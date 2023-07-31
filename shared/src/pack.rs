@@ -112,3 +112,30 @@ impl<T0, T1, T2, T3> Pack for (T0, T1, T2, T3) where T0: Pack, T1: Pack, T2: Pac
         self.3.pack::<B>(buffer);
     }
 }
+
+impl<T> Pack for &T where T: Pack {
+    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
+        T::pack::<B>(self, buffer)
+    }
+}
+
+impl<T> Pack for &mut T where T: Pack {
+    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
+        T::pack::<B>(self, buffer)
+    }
+}
+
+impl<T> Pack for Box<T> where T: Pack {
+    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
+        T::pack::<B>(self, buffer)
+    }
+}
+
+impl<T> Pack for Option<T> where T: Pack {
+    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
+        match self {
+            Some(x) => (true, x).pack::<B>(buffer),
+            None => false.pack::<B>(buffer),
+        }
+    }
+}

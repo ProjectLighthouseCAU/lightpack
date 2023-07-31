@@ -64,3 +64,19 @@ impl<T1, T2, T3> Size for (T1, T2, T3) where T1: Size, T2: Size, T3: Size {
 impl<T1, T2, T3, T4> Size for (T1, T2, T3, T4) where T1: Size, T2: Size, T3: Size, T4: Size {
     const SIZE: usize = T1::SIZE + T2::SIZE + T3::SIZE + T4::SIZE;
 }
+
+impl<T> Size for &T where T: Size {
+    const SIZE: usize = T::SIZE;
+}
+
+impl<T> Size for &mut T where T: Size {
+    const SIZE: usize = T::SIZE;
+}
+
+impl<T> Size for Box<T> where T: Size {
+    const SIZE: usize = T::SIZE;
+}
+
+impl<T> Size for Option<T> where T: Size {
+    const SIZE: usize = T::SIZE + 1;
+}
