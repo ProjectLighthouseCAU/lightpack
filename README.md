@@ -1,5 +1,7 @@
 # Lightpack
 
+[![Build](https://github.com/ProjectLighthouseCAU/lightpack/actions/workflows/build.yml/badge.svg)](https://github.com/ProjectLighthouseCAU/lightpack/actions/workflows/build.yml)
+
 A lighweight, no-std binary serialization library.
 
 ## Example
