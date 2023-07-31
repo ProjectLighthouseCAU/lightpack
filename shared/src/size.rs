@@ -34,3 +34,25 @@ impl Size for i32 {
 impl Size for i64 {
     const SIZE: usize = 8;
 }
+
+impl Size for () {
+    const SIZE: usize = 0;
+}
+
+// TODO: Abstract over the tuple size with a macro
+
+impl<T1> Size for (T1,) where T1: Size {
+    const SIZE: usize = T1::SIZE;
+}
+
+impl<T1, T2> Size for (T1, T2) where T1: Size, T2: Size {
+    const SIZE: usize = T1::SIZE + T2::SIZE;
+}
+
+impl<T1, T2, T3> Size for (T1, T2, T3) where T1: Size, T2: Size, T3: Size {
+    const SIZE: usize = T1::SIZE + T2::SIZE + T3::SIZE;
+}
+
+impl<T1, T2, T3, T4> Size for (T1, T2, T3, T4) where T1: Size, T2: Size, T3: Size, T4: Size {
+    const SIZE: usize = T1::SIZE + T2::SIZE + T3::SIZE + T4::SIZE;
+}

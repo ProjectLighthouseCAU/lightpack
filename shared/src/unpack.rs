@@ -1,6 +1,8 @@
 use byteorder::ByteOrder;
 
-pub trait Unpack {
+use crate::Size;
+
+pub trait Unpack: Size {
     /// Decodes the type from a binary representation.
     fn unpack<B>(buffer: &[u8]) -> Self where B: ByteOrder ;
 }
@@ -51,5 +53,52 @@ impl Unpack for i32 {
 impl Unpack for i64 {
     fn unpack<B>(buffer: &[u8]) -> Self where B: ByteOrder {
         B::read_i64(buffer)
+    }
+}
+
+// TODO: Abstract over the tuple size with a macro
+
+impl Unpack for () {
+    fn unpack<B>(_buffer: &[u8]) -> Self where B: ByteOrder {
+        ()
+    }
+}
+
+impl<T0> Unpack for (T0,) where T0: Unpack {
+    fn unpack<B>(buffer: &[u8]) -> Self where B: ByteOrder {
+        (T0::unpack::<B>(buffer),)
+    }
+}
+
+impl<T0, T1> Unpack for (T0, T1) where T0: Unpack, T1: Unpack {
+    fn unpack<B>(buffer: &[u8]) -> Self where B: ByteOrder {
+        let x0 = T0::unpack::<B>(buffer);
+        let buffer = &buffer[T0::SIZE..];
+        let x1 = T1::unpack::<B>(buffer);
+        (x0, x1)
+    }
+}
+
+impl<T0, T1, T2> Unpack for (T0, T1, T2) where T0: Unpack, T1: Unpack, T2: Unpack {
+    fn unpack<B>(buffer: &[u8]) -> Self where B: ByteOrder {
+        let x0 = T0::unpack::<B>(buffer);
+        let buffer = &buffer[T0::SIZE..];
+        let x1 = T1::unpack::<B>(buffer);
+        let buffer = &buffer[T1::SIZE..];
+        let x2 = T2::unpack::<B>(buffer);
+        (x0, x1, x2)
+    }
+}
+
+impl<T0, T1, T2, T3> Unpack for (T0, T1, T2, T3) where T0: Unpack, T1: Unpack, T2: Unpack, T3: Unpack {
+    fn unpack<B>(buffer: &[u8]) -> Self where B: ByteOrder {
+        let x0 = T0::unpack::<B>(buffer);
+        let buffer = &buffer[T0::SIZE..];
+        let x1 = T1::unpack::<B>(buffer);
+        let buffer = &buffer[T1::SIZE..];
+        let x2 = T2::unpack::<B>(buffer);
+        let buffer = &buffer[T2::SIZE..];
+        let x3 = T3::unpack::<B>(buffer);
+        (x0, x1, x2, x3)
     }
 }
