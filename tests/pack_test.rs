@@ -1,5 +1,5 @@
 use byteorder::{ByteOrder, BigEndian, LittleEndian};
-use lightpack_shared::Pack;
+use lightpack::Pack;
 
 // TODO: This will likely be much easier once generic_const_exprs
 //       stabilizes since we can just use P::SIZE instead of N.
