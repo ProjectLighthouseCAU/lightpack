@@ -12,7 +12,9 @@ pub fn derive_size(input: TokenStream) -> TokenStream {
             Fields::Named(fs) => fs.named.into_iter()
                 .map(|f| f.ty)
                 .collect(),
-            Fields::Unnamed(_) => unimplemented!("#[derive(Size)] is not supported for tuple structs yet!"),
+            Fields::Unnamed(fs) => fs.unnamed.into_iter()
+                .map(|f| f.ty)
+                .collect(),
             Fields::Unit => Vec::new(),
         },
         Data::Enum(_) => unimplemented!("#[derive(Size)] is not supported for enums yet!"),
@@ -21,7 +23,8 @@ pub fn derive_size(input: TokenStream) -> TokenStream {
 
     let size_expr = field_types.into_iter()
         .map(|f| quote! { #f::SIZE })
-        .reduce(|e1, e2| quote! { #e1 + #e2 });
+        .reduce(|e1, e2| quote! { #e1 + #e2 })
+        .unwrap_or_else(|| quote! { 0 });
 
     // TODO: Handle generics
     let impl_block = quote! {
