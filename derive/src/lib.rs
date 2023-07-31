@@ -1,11 +1,12 @@
 use proc_macro::TokenStream;
+use proc_macro2::Span;
 use quote::quote;
-use syn::{DeriveInput, Data, Fields, Type, Ident, Index};
+use syn::{DeriveInput, Data, Fields, Type, Index, Ident};
 
 #[proc_macro_derive(Size)]
 pub fn derive_size(input: TokenStream) -> TokenStream {
     let input: DeriveInput = syn::parse(input).expect("Could not parse derive input");
-    let name = &input.ident;
+    let name: Ident = input.ident;
 
     let field_types: Vec<Type> = match input.data {
         Data::Struct(s) => match s.fields {
@@ -39,7 +40,7 @@ pub fn derive_size(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(Pack)]
 pub fn derive_pack(input: TokenStream) -> TokenStream {
     let input: DeriveInput = syn::parse(input).expect("Could not parse derive input");
-    let name = &input.ident;
+    let name: Ident = input.ident;
 
     let field_exprs_and_tys: Vec<(_, _)> = match input.data {
         Data::Struct(s) => match s.fields {
@@ -82,5 +83,41 @@ pub fn derive_pack(input: TokenStream) -> TokenStream {
 
 #[proc_macro_derive(Unpack)]
 pub fn derive_unpack(input: TokenStream) -> TokenStream {
-    todo!()
+    let input: DeriveInput = syn::parse(input).expect("Could not parse derive input");
+    let name: Ident = input.ident;
+
+    let unpack_impl = match input.data {
+        Data::Struct(s) => match s.fields {
+            Fields::Named(fs) => {
+                let fields: Vec<Ident> = fs.named.iter().map(|f| f.ident.clone().expect("#[derive(Unpack)] requires fields to be named")).collect();
+                let tys: Vec<Type> = fs.named.iter().map(|f| f.ty.clone()).collect();
+                quote! {
+                    #(let #fields = #tys::unpack::<B>(buffer); let buffer = &buffer[#tys::SIZE..];)*
+                    #name { #(#fields),* }
+                }
+            },
+            Fields::Unnamed(fs) => {
+                let vars: Vec<Ident> = (0..fs.unnamed.len()).map(|i| Ident::new(&format!("x{}", i), Span::call_site())).collect();
+                let tys: Vec<Type> = fs.unnamed.iter().map(|f| f.ty.clone()).collect();
+                quote! {
+                    #(let #vars = #tys::unpack::<B>(buffer); let buffer = &buffer[#tys::SIZE..];)*
+                    #name(#(#vars),*)
+                }
+            },
+            Fields::Unit => quote! { #name },
+        },
+        Data::Enum(_) => unimplemented!("#[derive(Unpack)] is not supported for enums yet!"),
+        Data::Union(_) => unimplemented!("#[derive(Unpack)] is not supported for unions yet!"),
+    };
+
+    // TODO: Handle generics
+    let impl_block = quote! {
+        impl ::lightpack::Unpack for #name {
+            fn unpack<B>(buffer: &[u8]) -> Self where B: ::lightpack::byteorder::ByteOrder {
+                #unpack_impl
+            }
+        }
+    };
+
+    impl_block.into()
 }

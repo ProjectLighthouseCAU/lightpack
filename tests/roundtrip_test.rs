@@ -39,4 +39,37 @@ fn signed_ints() {
     assert_roundtrips!(i32::MAX);
 }
 
+#[test]
+fn derived_structs() {
+    #[derive(Size, Pack, Unpack, Clone, Copy, Debug, PartialEq, Eq)]
+    #[allow(dead_code)]
+    struct X {
+        x: u8,
+        y: u16,
+    }
+
+    #[derive(Size, Pack, Unpack, Clone, Copy, Debug, PartialEq, Eq)]
+    #[allow(dead_code)]
+    struct Y {
+        x0: X,
+        x1: X,
+        x2: bool,
+    }
+
+    #[derive(Size, Pack, Unpack, Clone, Copy, Debug, PartialEq, Eq)]
+    struct Tuple(X, Y);
+
+    #[derive(Size, Pack, Unpack, Clone, Copy, Debug, PartialEq, Eq)]
+    struct Unit;
+
+    let x0 = X { x: 3, y: 4 };
+    let x1 = X { x: 2, y: 8 };
+    let y = Y { x0, x1, x2: true };
+
+    assert_roundtrips!(x0);
+    assert_roundtrips!(x1);
+    assert_roundtrips!(y);
+    assert_roundtrips!(Tuple(x0, y));
+    assert_roundtrips!(Unit);
+}
 
