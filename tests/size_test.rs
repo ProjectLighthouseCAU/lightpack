@@ -17,7 +17,7 @@ fn signed_ints() {
 }
 
 #[test]
-fn derived_struct_size() {
+fn derived_structs() {
     #[derive(Size)]
     #[allow(dead_code)]
     struct X {

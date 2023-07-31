@@ -1,5 +1,5 @@
 use byteorder::{ByteOrder, BigEndian, LittleEndian};
-use lightpack::Pack;
+use lightpack::{Pack, Size};
 
 // TODO: This will likely be much easier once generic_const_exprs
 //       stabilizes since we can just use P::SIZE instead of N.
@@ -32,3 +32,31 @@ fn signed_ints() {
     assert_eq!(pack_buf::<BigEndian, i16, 2>(256), [1, 0]);
     assert_eq!(pack_buf::<LittleEndian, i16, 2>(256), [0, 1]);
 }
+
+#[test]
+fn derived_structs() {
+    #[derive(Size, Pack)]
+    #[allow(dead_code)]
+    struct X {
+        x: u8,
+        y: u16,
+    }
+
+    #[derive(Size, Pack)]
+    #[allow(dead_code)]
+    struct Y {
+        x0: X,
+        x1: X,
+        x2: bool,
+    }
+
+    #[derive(Size, Pack)]
+    struct Tuple(X, Y);
+
+    #[derive(Size, Pack)]
+    struct Unit;
+
+    assert_eq!(pack_buf::<BigEndian, _, 3>(X { x: 3, y: 4 }), [3, 0, 4]);
+    assert_eq!(pack_buf::<LittleEndian, _, 3>(X { x: 3, y: 4 }), [3, 4, 0]);
+}
+
