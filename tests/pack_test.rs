@@ -35,14 +35,14 @@ fn signed_ints() {
 
 #[test]
 fn derived_structs() {
-    #[derive(Size, Pack)]
+    #[derive(Size, Pack, Clone, Copy)]
     #[allow(dead_code)]
     struct X {
         x: u8,
         y: u16,
     }
 
-    #[derive(Size, Pack)]
+    #[derive(Size, Pack, Clone, Copy)]
     #[allow(dead_code)]
     struct Y {
         x0: X,
@@ -50,13 +50,21 @@ fn derived_structs() {
         x2: bool,
     }
 
-    #[derive(Size, Pack)]
+    #[derive(Size, Pack, Clone, Copy)]
     struct Tuple(X, Y);
 
-    #[derive(Size, Pack)]
+    #[derive(Size, Pack, Clone, Copy)]
     struct Unit;
 
-    assert_eq!(pack_buf::<BigEndian, _, 3>(X { x: 3, y: 4 }), [3, 0, 4]);
-    assert_eq!(pack_buf::<LittleEndian, _, 3>(X { x: 3, y: 4 }), [3, 4, 0]);
+    let x0 = X { x: 3, y: 4 };
+    let x1 = X { x: 2, y: 8 };
+    let y = Y { x0, x1, x2: true };
+
+    assert_eq!(pack_buf::<BigEndian, _, 3>(x0), [3, 0, 4]);
+    assert_eq!(pack_buf::<LittleEndian, _, 3>(x1), [2, 8, 0]);
+    assert_eq!(pack_buf::<BigEndian, _, 7>(y), [3, 0, 4, 2, 0, 8, 1]);
+    assert_eq!(pack_buf::<BigEndian, _, 10>(Tuple(x0, y)), [3, 0, 4, 3, 0, 4, 2, 0, 8, 1]);
+    assert_eq!(pack_buf::<BigEndian, _, 0>(Unit), []);
+    assert_eq!(pack_buf::<BigEndian, _, 2>(Unit), [0, 0]);
 }
 
