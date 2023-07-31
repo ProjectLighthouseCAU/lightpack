@@ -1,3 +1,3 @@
 # Lightpack
 
-A minimal, no-std binary serialization library.
+A lighweight, no-std binary serialization library.
