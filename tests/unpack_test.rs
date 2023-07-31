@@ -3,14 +3,14 @@ use lightpack::{Unpack, Size};
 
 #[test]
 fn unsigned_ints() {
-    assert_eq!(u8::unpack::<BigEndian>(&[4]), 4);
-    assert_eq!(u16::unpack::<BigEndian>(&[1, 0]), 256);
-    assert_eq!(u16::unpack::<LittleEndian>(&[0, 1]), 256);
+    assert_eq!(u8::unpack::<BigEndian>(&[4]), Ok(4));
+    assert_eq!(u16::unpack::<BigEndian>(&[1, 0]), Ok(256));
+    assert_eq!(u16::unpack::<LittleEndian>(&[0, 1]), Ok(256));
 }
 
 #[test]
 fn signed_ints() {
-    assert_eq!(i8::unpack::<BigEndian>(&[255]), -1);
+    assert_eq!(i8::unpack::<BigEndian>(&[255]), Ok(-1));
 }
 
 #[test]
@@ -40,12 +40,12 @@ fn derived_structs() {
     let x1 = X { x: 2, y: 8 };
     let y = Y { x0, x1, x2: true };
 
-    assert_eq!(X::unpack::<BigEndian>(&[3, 0, 4]), x0);
-    assert_eq!(X::unpack::<LittleEndian>(&[3, 4, 0]), x0);
-    assert_eq!(X::unpack::<BigEndian>(&[2, 0, 8]), x1);
-    assert_eq!(Tuple::unpack::<BigEndian>(&[3, 0, 4, 3, 0, 4, 2, 0, 8, 1]), Tuple(x0, y));
-    assert_eq!(Unit::unpack::<BigEndian>(&[]), Unit);
-    assert_eq!(Unit::unpack::<BigEndian>(&[1, 2]), Unit);
+    assert_eq!(X::unpack::<BigEndian>(&[3, 0, 4]), Ok(x0));
+    assert_eq!(X::unpack::<LittleEndian>(&[3, 4, 0]), Ok(x0));
+    assert_eq!(X::unpack::<BigEndian>(&[2, 0, 8]), Ok(x1));
+    assert_eq!(Tuple::unpack::<BigEndian>(&[3, 0, 4, 3, 0, 4, 2, 0, 8, 1]), Ok(Tuple(x0, y)));
+    assert_eq!(Unit::unpack::<BigEndian>(&[]), Ok(Unit));
+    assert_eq!(Unit::unpack::<BigEndian>(&[1, 2]), Ok(Unit));
 }
 
 

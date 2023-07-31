@@ -11,6 +11,6 @@ fn main() {
     Point { x: 3, y: 4 }.pack::<BigEndian>(&mut buffer);
     println!("{:?}", buffer); // => [0, 3, 0, 4]
 
-    let point = Point::unpack::<BigEndian>(&[0, 3, 0, 4]);
+    let point = Point::unpack::<BigEndian>(&[0, 3, 0, 4]).unwrap();
     println!("{:?}", point); // => Point { x: 3, y: 4 }
 }

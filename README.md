@@ -27,7 +27,7 @@ Point { x: 3, y: 4 }.pack::<BigEndian>(&mut buffer);
 To decode, call `unpack` on a `&[u8]` slice:
 
 ```rust
-Point::unpack::<BigEndian>(&[0, 3, 0, 4]);
+Point::unpack::<BigEndian>(&[0, 3, 0, 4]).unwrap();
 // => Point { x: 3, y: 4 }
 ```
 

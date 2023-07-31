@@ -4,7 +4,7 @@ use lightpack::{Pack, Unpack, Size};
 fn roundtrip<B, P>(value: P) -> P where B: ByteOrder, P: Pack + Unpack {
     let mut buffer = vec![0u8; P::SIZE];
     value.pack::<B>(&mut buffer);
-    P::unpack::<B>(&buffer)
+    P::unpack::<B>(&buffer).unwrap()
 }
 
 macro_rules! assert_roundtrips {
