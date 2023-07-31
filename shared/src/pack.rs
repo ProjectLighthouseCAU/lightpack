@@ -125,12 +125,6 @@ impl<T> Pack for &mut T where T: Pack {
     }
 }
 
-impl<T> Pack for Box<T> where T: Pack {
-    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
-        T::pack::<B>(self, buffer)
-    }
-}
-
 impl<T> Pack for Option<T> where T: Pack {
     fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
         match self {

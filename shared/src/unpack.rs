@@ -117,12 +117,6 @@ impl<T0, T1, T2, T3> Unpack for (T0, T1, T2, T3) where T0: Unpack, T1: Unpack, T
     }
 }
 
-impl<T> Unpack for Box<T> where T: Unpack {
-    fn unpack<B>(buffer: &[u8]) -> Self where B: ByteOrder {
-        Box::new(T::unpack::<B>(buffer))
-    }
-}
-
 impl<T> Unpack for Option<T> where T: Unpack {
     fn unpack<B>(buffer: &[u8]) -> Self where B: ByteOrder {
         let is_some = bool::unpack::<B>(buffer);

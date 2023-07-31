@@ -1,3 +1,5 @@
+#![no_std]
+
 mod pack;
 mod size;
 mod unpack;
