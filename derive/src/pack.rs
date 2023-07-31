@@ -36,9 +36,11 @@ pub fn derive_pack(input: TokenStream) -> TokenStream {
         Data::Enum(_) => {
             let repr_type: Type = repr_type(&input)
                 .expect("#[derive(Pack)] currently only supports enums with a #[repr]");
+            
+            // TODO: Verify that enum also derives Copy?
 
             quote! {
-                self as #repr_type
+                (*self as #repr_type).pack::<B>(buffer)
             }
         },
         Data::Union(_) => unimplemented!("#[derive(Pack)] is not supported for unions yet!"),

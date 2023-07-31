@@ -61,3 +61,25 @@ fn derived_structs() {
     assert_eq!(pack_vec::<BigEndian, _>(Unit), vec![]);
 }
 
+#[test]
+fn derived_enums() {
+    #[derive(Size, Pack, Clone, Copy)]
+    #[repr(u8)]
+    #[allow(dead_code)]
+    enum X {
+        A = 1,
+        B = 4,
+        C = 8,
+    }
+
+    #[derive(Size, Pack, Clone, Copy)]
+    #[repr(i32)]
+    #[allow(dead_code)]
+    enum Y {
+        A = -9,
+    }
+
+    assert_eq!(pack_vec::<BigEndian, _>(X::A), vec![1]);
+    assert_eq!(pack_vec::<BigEndian, _>(X::B), vec![4]);
+    assert_eq!(pack_vec::<BigEndian, _>(X::C), vec![8]);
+}
