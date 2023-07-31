@@ -26,11 +26,9 @@ pub fn derive_size(input: TokenStream) -> TokenStream {
         .unwrap_or_else(|| quote! { 0 });
 
     // TODO: Handle generics
-    let impl_block = quote! {
+    quote! {
         impl ::lightpack::Size for #name {
             const SIZE: usize = #size_expr;
         }
-    };
-
-    impl_block.into()
+    }
 }

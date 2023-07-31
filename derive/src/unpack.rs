@@ -9,8 +9,9 @@ pub fn derive_unpack(input: TokenStream) -> TokenStream {
     let unpack_impl = match input.data {
         Data::Struct(s) => match s.fields {
             Fields::Named(fs) => {
-                let fields: Vec<Ident> = fs.named.iter().map(|f| f.ident.clone().expect("#[derive(Unpack)] requires fields to be named")).collect();
-                let tys: Vec<Type> = fs.named.iter().map(|f| f.ty.clone()).collect();
+                let (fields, tys): (Vec<Ident>, Vec<Type>) = fs.named.into_iter()
+                    .map(|f| (f.ident.expect("#[derive(Unpack)] requires fields to be named"), f.ty))
+                    .unzip();
                 quote! {
                     #(let #fields = #tys::unpack::<B>(buffer); let buffer = &buffer[#tys::SIZE..];)*
                     #name { #(#fields),* }
@@ -31,13 +32,11 @@ pub fn derive_unpack(input: TokenStream) -> TokenStream {
     };
 
     // TODO: Handle generics
-    let impl_block = quote! {
+    quote! {
         impl ::lightpack::Unpack for #name {
             fn unpack<B>(buffer: &[u8]) -> Self where B: ::lightpack::byteorder::ByteOrder {
                 #unpack_impl
             }
         }
-    };
-
-    impl_block.into()
+    }
 }
