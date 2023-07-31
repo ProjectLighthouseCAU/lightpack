@@ -1,10 +1,12 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{DeriveInput, Data, Fields, Index, Ident};
+use syn::{DeriveInput, Data, Fields, Index, Ident, Type};
+
+use crate::util::repr_type;
 
 pub fn derive_pack(input: TokenStream) -> TokenStream {
     let input: DeriveInput = syn::parse2(input).expect("Could not parse derive input");
-    let name: Ident = input.ident;
+    let name: &Ident = &input.ident;
 
     let pack_impl = match input.data {
         Data::Struct(s) => {
@@ -31,7 +33,14 @@ pub fn derive_pack(input: TokenStream) -> TokenStream {
                 #(#fields.pack::<B>(buffer); let buffer = &mut buffer[#tys::SIZE..];)*
             }
         },
-        Data::Enum(_) => unimplemented!("#[derive(Pack)] is not supported for enums yet!"),
+        Data::Enum(_) => {
+            let repr_type: Type = repr_type(&input)
+                .expect("#[derive(Pack)] currently only supports enums with a #[repr]");
+
+            quote! {
+                self as #repr_type
+            }
+        },
         Data::Union(_) => unimplemented!("#[derive(Pack)] is not supported for unions yet!"),
     };
 

@@ -1,6 +1,7 @@
 mod pack;
 mod size;
 mod unpack;
+mod util;
 
 use proc_macro::TokenStream;
 

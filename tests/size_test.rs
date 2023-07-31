@@ -44,3 +44,25 @@ fn derived_structs() {
     assert_eq!(Tuple::SIZE, 10);
     assert_eq!(Unit::SIZE, 0);
 }
+
+#[test]
+fn derived_enums() {
+    #[derive(Size)]
+    #[repr(u8)]
+    #[allow(dead_code)]
+    enum X {
+        A = 1,
+        B = 4,
+        C = 8,
+    }
+
+    #[derive(Size)]
+    #[repr(i32)]
+    #[allow(dead_code)]
+    enum Y {
+        A = -9,
+    }
+
+    assert_eq!(X::SIZE, 1);
+    assert_eq!(Y::SIZE, 4);
+}
