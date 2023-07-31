@@ -16,29 +16,29 @@ fn signed_ints() {
     assert_eq!(i64::SIZE, 8);
 }
 
-#[derive(Size)]
-#[allow(dead_code)]
-struct X {
-    x: u8,
-    y: u16,
-}
-
-#[derive(Size)]
-#[allow(dead_code)]
-struct Y {
-    x0: X,
-    x1: X,
-    x2: bool,
-}
-
-#[derive(Size)]
-struct Tuple(X, Y);
-
-#[derive(Size)]
-struct Unit;
-
 #[test]
 fn derived_struct_size() {
+    #[derive(Size)]
+    #[allow(dead_code)]
+    struct X {
+        x: u8,
+        y: u16,
+    }
+
+    #[derive(Size)]
+    #[allow(dead_code)]
+    struct Y {
+        x0: X,
+        x1: X,
+        x2: bool,
+    }
+
+    #[derive(Size)]
+    struct Tuple(X, Y);
+
+    #[derive(Size)]
+    struct Unit;
+
     assert_eq!(X::SIZE, 3);
     assert_eq!(Y::SIZE, 7);
     assert_eq!(Tuple::SIZE, 10);
