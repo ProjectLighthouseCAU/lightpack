@@ -31,7 +31,6 @@ impl Unpack for u64 {
     }
 }
 
-
 impl Unpack for i8 {
     fn unpack<B>(buffer: &[u8]) -> Self where B: ByteOrder {
         buffer[0] as i8
