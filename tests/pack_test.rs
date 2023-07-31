@@ -23,3 +23,12 @@ fn unsigned_ints() {
     assert_eq!(pack_buf::<LittleEndian, u32, 4>(1048), [24, 0b100, 0, 0]);
     assert_eq!(pack_buf::<BigEndian, u32, 4>(1048), [0, 0, 0b100, 24]);
 }
+
+#[test]
+fn signed_ints() {
+    assert_eq!(pack_buf::<BigEndian, i8, 1>(0), [0]);
+    assert_eq!(pack_buf::<BigEndian, i8, 2>(-1), [255, 0]);
+    assert_eq!(pack_buf::<LittleEndian, i8, 2>(-2), [254, 0]);
+    assert_eq!(pack_buf::<BigEndian, i16, 2>(256), [1, 0]);
+    assert_eq!(pack_buf::<LittleEndian, i16, 2>(256), [0, 1]);
+}
