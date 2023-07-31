@@ -2,3 +2,6 @@
 name = "lightpack-shared"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies]
+byteorder = { workspace = true }
