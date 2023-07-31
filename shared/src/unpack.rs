@@ -56,6 +56,21 @@ impl Unpack for i64 {
     }
 }
 
+impl Unpack for bool {
+    fn unpack<B>(buffer: &[u8]) -> Self where B: ByteOrder {
+        buffer[0] != 0
+    }
+}
+
+impl Unpack for char {
+    fn unpack<B>(buffer: &[u8]) -> Self where B: ByteOrder {
+        // TODO: We might want to pass this error to the user, but would
+        //       we really want to complicate the API for this rather
+        //       exotic issue?
+        char::from_u32(u32::unpack::<B>(buffer)).expect("Could not unpack 32-bit integer as char")
+    }
+}
+
 // TODO: Abstract over the tuple size with a macro
 
 impl Unpack for () {

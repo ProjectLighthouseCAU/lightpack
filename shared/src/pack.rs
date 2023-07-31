@@ -57,6 +57,18 @@ impl Pack for i64 {
     }
 }
 
+impl Pack for bool {
+    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
+        buffer[0] = *self as u8;
+    }
+}
+
+impl Pack for char {
+    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
+        (*self as u32).pack::<B>(buffer);
+    }
+}
+
 // TODO: Abstract over the tuple size with a macro
 
 impl Pack for () {
