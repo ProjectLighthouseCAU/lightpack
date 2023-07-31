@@ -9,6 +9,6 @@ edition = "2021"
 proc-macro = true
 
 [dependencies]
-lightpack-traits = { path = "../traits" }
+lightpack-shared = { path = "../shared" }
 syn = "2.0"
 quote = "1.0"

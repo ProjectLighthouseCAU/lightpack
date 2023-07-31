@@ -7,10 +7,13 @@ edition = "2021"
 
 [dependencies]
 lightpack-derive = { path = "derive" }
-lightpack-traits = { path = "traits" }
+lightpack-shared = { path = "shared" }
 
 [workspace]
 members = [
     "derive",
-    "traits"
+    "shared"
 ]
+
+[workspace.dependencies]
+byteorder = "1"
