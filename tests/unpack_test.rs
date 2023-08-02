@@ -50,6 +50,29 @@ fn basic_structs() {
 }
 
 #[test]
+fn generic_structs() {
+    #[derive(Size, Unpack, Debug, PartialEq, Eq)]
+    #[allow(dead_code)]
+    struct Wrap<T>(T);
+
+    #[derive(Size, Unpack, Debug, PartialEq, Eq)]
+    #[allow(dead_code)]
+    struct Pair<L, R> {
+        left: L,
+        right: R,
+    }
+
+    assert_eq!(Wrap::unpack::<LittleEndian>(&[3, 0, 0, 0]), Ok(Wrap(3i32)));
+    assert_eq!(Wrap::unpack::<BigEndian>(&[0, 4]), Ok(Wrap(4u16)));
+
+    let buffer = [9, 8, 3];
+    assert_eq!(
+        <(i16, u8)>::unpack::<BigEndian>(&buffer),
+        Pair::<i16, u8>::unpack::<BigEndian>(&buffer).map(|Pair { left, right }| (left, right))
+    );
+}
+
+#[test]
 fn primitive_enums() {
     #[derive(Size, Unpack, Clone, Copy, PartialEq, Eq, Debug)]
     #[repr(u8)]

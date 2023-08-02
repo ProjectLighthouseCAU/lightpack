@@ -74,6 +74,24 @@ fn basic_structs() {
 }
 
 #[test]
+fn generic_structs() {
+    #[derive(Size, Pack, Unpack, Debug, PartialEq, Eq)]
+    #[allow(dead_code)]
+    struct Wrap<T>(T);
+
+    #[derive(Size, Pack, Unpack, Debug, PartialEq, Eq)]
+    #[allow(dead_code)]
+    struct Pair<L, R> {
+        left: L,
+        right: R,
+    }
+
+    assert_roundtrips!(Wrap(-1i8));
+    assert_roundtrips!(Wrap(13u16));
+    assert_roundtrips!(Pair { left: Wrap(23i64), right: Wrap(274u32) });
+}
+
+#[test]
 fn primitive_enums() {
     #[derive(Size, Pack, Unpack, Clone, Copy, PartialEq, Eq, Debug)]
     #[repr(u8)]

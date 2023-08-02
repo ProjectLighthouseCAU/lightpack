@@ -62,6 +62,24 @@ fn basic_structs() {
 }
 
 #[test]
+fn generic_structs() {
+    #[derive(Size, Pack)]
+    #[allow(dead_code)]
+    struct Wrap<T>(T);
+
+    #[derive(Size, Pack)]
+    #[allow(dead_code)]
+    struct Pair<L, R> {
+        left: L,
+        right: R,
+    }
+
+    assert_eq!(pack_vec::<LittleEndian, _>(Wrap(3i32)), vec![3, 0, 0, 0]);
+    assert_eq!(pack_vec::<BigEndian, _>(Wrap(4u16)), vec![0, 4]);
+    assert_eq!(pack_vec::<BigEndian, _>(Pair { left: -4i16, right: 3u8 }), pack_vec::<BigEndian, _>((-4i16, 3u8)));
+}
+
+#[test]
 fn primitive_enums() {
     #[derive(Size, Pack, Clone, Copy)]
     #[repr(u8)]

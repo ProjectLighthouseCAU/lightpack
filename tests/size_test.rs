@@ -49,9 +49,7 @@ fn basic_structs() {
 fn generic_structs() {
     #[derive(Size)]
     #[allow(dead_code)]
-    struct Wrap<T> {
-        wrapped: T,
-    }
+    struct Wrap<T>(T);
 
     #[derive(Size)]
     #[allow(dead_code)]
