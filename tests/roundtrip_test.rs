@@ -73,3 +73,31 @@ fn derived_structs() {
     assert_roundtrips!(Unit);
 }
 
+#[test]
+fn derived_enums() {
+    #[derive(Size, Pack, Unpack, Clone, Copy, PartialEq, Eq, Debug)]
+    #[repr(u8)]
+    #[allow(dead_code)]
+    enum X {
+        A = 1,
+        B = 4,
+        C = 8,
+    }
+
+    #[derive(Size, Pack, Unpack, Clone, Copy, PartialEq, Eq, Debug)]
+    #[repr(i32)]
+    #[allow(dead_code)]
+    enum Y {
+        A = -9,
+        B = 32,
+        C = 1,
+    }
+
+    assert_roundtrips!(X::A);
+    assert_roundtrips!(X::B);
+    assert_roundtrips!(X::C);
+    assert_roundtrips!(Y::A);
+    assert_roundtrips!(Y::B);
+    assert_roundtrips!(Y::C);
+}
+
