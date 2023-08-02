@@ -17,7 +17,7 @@ fn signed_ints() {
 }
 
 #[test]
-fn derived_structs() {
+fn basic_structs() {
     #[derive(Size)]
     #[allow(dead_code)]
     struct X {
@@ -46,7 +46,7 @@ fn derived_structs() {
 }
 
 #[test]
-fn derived_enums() {
+fn primitive_enums() {
     #[derive(Size)]
     #[repr(u8)]
     #[allow(dead_code)]
