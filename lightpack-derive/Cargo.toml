@@ -1,5 +1,6 @@
 [package]
 name = "lightpack-derive"
+description = "Implementation of #[derive(Size, Pack, Unpack)]"
 version = "0.1.0"
 edition = "2021"
 

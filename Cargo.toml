@@ -1,5 +1,6 @@
 [package]
 name = "lightpack"
+description = "A lightweight, no-std binary serialization library"
 version = "0.1.0"
 edition = "2021"
 
