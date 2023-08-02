@@ -21,4 +21,4 @@ members = [
 ]
 
 [workspace.dependencies]
-byteorder = "1"
+byteorder = { version = "1", default-features = false }
