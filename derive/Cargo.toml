@@ -9,7 +9,7 @@ edition = "2021"
 proc-macro = true
 
 [dependencies]
-lightpack-shared = { path = "../shared" }
+lightpack-shared = { version = "0.1.0", path = "../shared" }
 proc-macro2 = "1.0"
 syn = "2.0"
 quote = "1.0"

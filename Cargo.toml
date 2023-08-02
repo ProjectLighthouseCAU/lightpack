@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-lightpack-derive = { path = "derive" }
-lightpack-shared = { path = "shared" }
+lightpack-derive = { version = "0.1.0", path = "derive" }
+lightpack-shared = { version = "0.1.0", path = "shared" }
 byteorder = { workspace = true }
 
 [workspace]
