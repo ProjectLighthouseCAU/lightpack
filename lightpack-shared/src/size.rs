@@ -1,3 +1,4 @@
+/// Types that have an encoded size.
 pub trait Size {
     /// The type's encoded size in bytes.
     const SIZE: usize;

@@ -2,6 +2,7 @@ use byteorder::ByteOrder;
 
 use crate::Size;
 
+/// An error during unpacking.
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub enum Error {
     InvalidChar(u32),
@@ -15,8 +16,10 @@ pub enum Error {
     InvalidEnumValueI64(i64),
 }
 
+/// The result type for unpacked results.
 pub type Result<T> = core::result::Result<T, Error>;
 
+/// Types that can be decoded from a binary representation.
 pub trait Unpack: Size {
     /// Decodes the type from a binary representation.
     fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder, Self: Sized;

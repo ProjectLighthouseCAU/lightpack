@@ -2,6 +2,7 @@ use byteorder::ByteOrder;
 
 use crate::Size;
 
+/// Types that can be encoded to a binary representation.
 pub trait Pack: Size {
     /// Encodes `self` to a binary representation.
     fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder;
