@@ -1,6 +1,5 @@
 use byteorder::{BigEndian, LittleEndian};
-use lightpack::{Unpack, Size};
-use lightpack_shared::unpack::Error;
+use lightpack::{Unpack, Size, unpack::Error};
 
 #[test]
 fn unsigned_ints() {

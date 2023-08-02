@@ -8,13 +8,11 @@ edition = "2021"
 
 [dependencies]
 lightpack-derive = { version = "0.1.0", path = "lightpack-derive" }
-lightpack-shared = { version = "0.1.0", path = "lightpack-shared" }
 byteorder = { workspace = true }
 
 [workspace]
 members = [
     "lightpack-derive",
-    "lightpack-shared",
 ]
 
 [workspace.dependencies]
