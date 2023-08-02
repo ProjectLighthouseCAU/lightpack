@@ -8,14 +8,14 @@ pub fn derive_size(input: TokenStream) -> TokenStream {
     let input: DeriveInput = syn::parse2(input).expect("Could not parse derive input");
     let name: &Ident = &input.ident;
 
-    let size_expr = match input.data {
+    let size_expr = match &input.data {
         Data::Struct(s) => {
-            let field_types: Vec<Type> = match s.fields {
-                Fields::Named(fs) => fs.named.into_iter()
-                    .map(|f| f.ty)
+            let field_types: Vec<&Type> = match &s.fields {
+                Fields::Named(fs) => fs.named.iter()
+                    .map(|f| &f.ty)
                     .collect(),
-                Fields::Unnamed(fs) => fs.unnamed.into_iter()
-                    .map(|f| f.ty)
+                Fields::Unnamed(fs) => fs.unnamed.iter()
+                    .map(|f| &f.ty)
                     .collect(),
                 Fields::Unit => Vec::new(),
             };

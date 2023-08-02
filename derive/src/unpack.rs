@@ -4,13 +4,13 @@ use syn::{DeriveInput, Data, Fields, Type, Ident};
 
 pub fn derive_unpack(input: TokenStream) -> TokenStream {
     let input: DeriveInput = syn::parse2(input).expect("Could not parse derive input");
-    let name: Ident = input.ident;
+    let name: &Ident = &input.ident;
 
-    let unpack_impl = match input.data {
-        Data::Struct(s) => match s.fields {
+    let unpack_impl = match &input.data {
+        Data::Struct(s) => match &s.fields {
             Fields::Named(fs) => {
-                let (fields, tys): (Vec<Ident>, Vec<Type>) = fs.named.into_iter()
-                    .map(|f| (f.ident.expect("#[derive(Unpack)] requires fields to be named"), f.ty))
+                let (fields, tys): (Vec<&Ident>, Vec<&Type>) = fs.named.iter()
+                    .map(|f| (f.ident.as_ref().expect("#[derive(Unpack)] requires fields to be named"), &f.ty))
                     .unzip();
                 quote! {
                     #(let #fields = #tys::unpack::<B>(buffer)?; let buffer = &buffer[#tys::SIZE..];)*

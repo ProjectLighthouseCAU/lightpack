@@ -8,22 +8,22 @@ pub fn derive_pack(input: TokenStream) -> TokenStream {
     let input: DeriveInput = syn::parse2(input).expect("Could not parse derive input");
     let name: &Ident = &input.ident;
 
-    let pack_impl = match input.data {
+    let pack_impl = match &input.data {
         Data::Struct(s) => {
-            let (fields, tys) = match s.fields {
-                Fields::Named(fs) => fs.named.into_iter()
+            let (fields, tys) = match &s.fields {
+                Fields::Named(fs) => fs.named.iter()
                     .map(|f| {
-                        let ident = f.ident.expect("#[derive(Pack)] requires fields to be named");
-                        (quote! { self.#ident }, f.ty)
+                        let ident = f.ident.as_ref().expect("#[derive(Pack)] requires fields to be named");
+                        (quote! { self.#ident }, &f.ty)
                     })
                     .unzip(),
-                Fields::Unnamed(fs) => fs.unnamed.into_iter()
+                Fields::Unnamed(fs) => fs.unnamed.iter()
                     .enumerate()
                     .map(|(i, f)| {
                         // We need to do this, otherwise the quoter will append
                         // a number literal suffix, which isn't supported.
                         let index = Index::from(i);
-                        (quote! { self.#index }, f.ty)
+                        (quote! { self.#index }, &f.ty)
                     })
                     .unzip(),
                 Fields::Unit => (Vec::new(), Vec::new()),

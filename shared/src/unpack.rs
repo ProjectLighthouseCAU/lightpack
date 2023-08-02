@@ -5,6 +5,14 @@ use crate::Size;
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub enum Error {
     InvalidChar(u32),
+    InvalidEnumValueU8(u8),
+    InvalidEnumValueU16(u16),
+    InvalidEnumValueU32(u32),
+    InvalidEnumValueU64(u64),
+    InvalidEnumValueI8(i8),
+    InvalidEnumValueI16(i16),
+    InvalidEnumValueI32(i32),
+    InvalidEnumValueI64(i64),
 }
 
 pub type Result<T> = core::result::Result<T, Error>;
