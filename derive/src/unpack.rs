@@ -1,6 +1,8 @@
 use proc_macro2::{TokenStream, Span};
 use quote::quote;
-use syn::{DeriveInput, Data, Fields, Type, Ident};
+use syn::{DeriveInput, Data, Fields, Type, Ident, Expr};
+
+use crate::util::{repr_type, type_to_ident};
 
 pub fn derive_unpack(input: TokenStream) -> TokenStream {
     let input: DeriveInput = syn::parse2(input).expect("Could not parse derive input");
@@ -27,7 +29,30 @@ pub fn derive_unpack(input: TokenStream) -> TokenStream {
             },
             Fields::Unit => quote! { Ok(#name) },
         },
-        Data::Enum(_) => unimplemented!("#[derive(Unpack)] is not supported for enums yet!"),
+        Data::Enum(ref e) => {
+            let repr_type: Type = repr_type(&input)
+                .expect("#[derive(Unpack)] currently only supports enums with a #[repr]");
+            let repr_ident: &Ident = type_to_ident(&repr_type)
+                .expect("#[derive(Unpack)] currently only supports enums with a primitive #[repr]");
+            
+            // TODO: Verify that enum also derives Copy?
+            
+            let (variants, discriminants): (Vec<&Ident>, Vec<&Expr>) = e.variants.iter()
+                .map(|v| (&v.ident, &v.discriminant.as_ref().expect("#[derive(Unpack)] requires explicit enum discriminants (for now)").1))
+                .unzip();
+
+            let error_variant = Ident::new(
+                &format!("InvalidEnumValue{}", repr_ident.to_string().to_uppercase()),
+                Span::call_site()
+            );
+
+            quote! {
+                match #repr_type::unpack::<B>(buffer)? {
+                    #(#discriminants => Ok(Self::#variants),)*
+                    value => Err(::lightpack::unpack::Error::#error_variant(value)),
+                }
+            }
+        },
         Data::Union(_) => unimplemented!("#[derive(Unpack)] is not supported for unions yet!"),
     };
 

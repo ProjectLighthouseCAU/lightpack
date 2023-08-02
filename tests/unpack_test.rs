@@ -1,5 +1,6 @@
 use byteorder::{BigEndian, LittleEndian};
 use lightpack::{Unpack, Size};
+use lightpack_shared::unpack::Error;
 
 #[test]
 fn unsigned_ints() {
@@ -48,4 +49,29 @@ fn derived_structs() {
     assert_eq!(Unit::unpack::<BigEndian>(&[1, 2]), Ok(Unit));
 }
 
+#[test]
+fn derived_enums() {
+    #[derive(Size, Unpack, Clone, Copy, PartialEq, Eq, Debug)]
+    #[repr(u8)]
+    #[allow(dead_code)]
+    enum X {
+        A = 1,
+        B = 4,
+        C = 8,
+    }
 
+    #[derive(Size, Unpack, Clone, Copy, PartialEq, Eq, Debug)]
+    #[repr(i32)]
+    #[allow(dead_code)]
+    enum Y {
+        A = -9,
+    }
+
+    assert_eq!(X::unpack::<BigEndian>(&[1]), Ok(X::A));
+    assert_eq!(X::unpack::<BigEndian>(&[4]), Ok(X::B));
+    assert_eq!(X::unpack::<LittleEndian>(&[8]), Ok(X::C));
+    assert_eq!(X::unpack::<LittleEndian>(&[2]), Err(Error::InvalidEnumValueU8(2)));
+    assert_eq!(Y::unpack::<LittleEndian>(&[255, 255, 255, 255]), Err(Error::InvalidEnumValueI32(-1)));
+    assert_eq!(Y::unpack::<BigEndian>(&[255, 255, 255, 247]), Ok(Y::A));
+    assert_eq!(Y::unpack::<LittleEndian>(&[247, 255, 255, 255]), Ok(Y::A));
+}
