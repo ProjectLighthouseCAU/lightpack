@@ -15,8 +15,8 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-      - name: Check package
-        run: cargo check
+      - name: Test package
+        run: cargo test
       - name: Publish lightpack-derive
         run: cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
         working-directory: lightpack-derive
