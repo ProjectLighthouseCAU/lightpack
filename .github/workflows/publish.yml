@@ -1,0 +1,24 @@
+name: Publish
+
+on:
+  push:
+    tags:
+    - '*'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Check package
+        run: cargo check
+      - name: Publish lightpack-derive
+        run: cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
+        working-directory: lightpack-derive
+      - name: Publish lightpack
+        run: cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
