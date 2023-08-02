@@ -36,9 +36,18 @@ pub fn derive_size(input: TokenStream) -> TokenStream {
         Data::Union(_) => unimplemented!("#[derive(Size)] is not supported for unions yet!"),
     };
 
-    // TODO: Handle generics
+    let impl_type_params = {
+        let types = input.generics.type_params();
+        quote! { <#(#types,)*> }
+    };
+
+    let where_clause = {
+        let types = input.generics.type_params();
+        quote! { #(#types: ::lightpack::Size,)* }
+    };
+
     quote! {
-        impl ::lightpack::Size for #name {
+        impl #impl_type_params ::lightpack::Size for #name #impl_type_params where #where_clause {
             const SIZE: usize = #size_expr;
         }
     }

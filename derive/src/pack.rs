@@ -46,10 +46,18 @@ pub fn derive_pack(input: TokenStream) -> TokenStream {
         Data::Union(_) => unimplemented!("#[derive(Pack)] is not supported for unions yet!"),
     };
 
-    // TODO: Handle generics
-    
+    let impl_type_params = {
+        let types = input.generics.type_params();
+        quote! { <#(#types,)*> }
+    };
+
+    let where_clause = {
+        let types = input.generics.type_params();
+        quote! { #(#types: ::lightpack::Pack,)* }
+    };
+
     quote! {
-        impl ::lightpack::Pack for #name {
+        impl #impl_type_params ::lightpack::Pack for #name #impl_type_params where #where_clause {
             fn pack<B>(&self, buffer: &mut [u8]) where B: ::lightpack::byteorder::ByteOrder {
                 #pack_impl
             }

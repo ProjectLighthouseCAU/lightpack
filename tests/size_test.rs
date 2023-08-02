@@ -46,6 +46,26 @@ fn basic_structs() {
 }
 
 #[test]
+fn generic_structs() {
+    #[derive(Size)]
+    #[allow(dead_code)]
+    struct Wrap<T> {
+        wrapped: T,
+    }
+
+    #[derive(Size)]
+    #[allow(dead_code)]
+    struct Pair<L, R> {
+        left: L,
+        right: R,
+    }
+
+    assert_eq!(Wrap::<i32>::SIZE, i32::SIZE);
+    assert_eq!(Wrap::<u8>::SIZE, u8::SIZE);
+    assert_eq!(Pair::<i16, u8>::SIZE, i16::SIZE + u8::SIZE);
+}
+
+#[test]
 fn primitive_enums() {
     #[derive(Size)]
     #[repr(u8)]
