@@ -101,3 +101,13 @@ fn primitive_enums() {
     assert_eq!(pack_vec::<BigEndian, _>(X::B), vec![4]);
     assert_eq!(pack_vec::<BigEndian, _>(X::C), vec![8]);
 }
+
+#[test]
+fn arrays() {
+    assert_eq!(pack_vec::<BigEndian, _>([0u32; 0]), vec![]);
+    assert_eq!(pack_vec::<BigEndian, _>([-1i8]), vec![255]);
+    assert_eq!(pack_vec::<BigEndian, _>([16u32; 3]), vec![0, 0, 0, 16, 0, 0, 0, 16, 0, 0, 0, 16]);
+    assert_eq!(pack_vec::<BigEndian, _>([3u8, 4, 1, 0, 2]), vec![3, 4, 1, 0, 2]);
+    assert_eq!(pack_vec::<LittleEndian, _>([2i16, 3, -1]), vec![2, 0, 3, 0, 255, 255]);
+    assert_eq!(pack_vec::<LittleEndian, _>([(true, false), (false, false), (true, true)]), vec![1, 0, 0, 0, 1, 1]);
+}

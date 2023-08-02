@@ -1,3 +1,5 @@
+use core::mem::MaybeUninit;
+
 use byteorder::ByteOrder;
 
 use crate::Size;
@@ -141,5 +143,35 @@ impl<T> Unpack for Option<T> where T: Unpack {
         } else {
             Ok(None)
         }
+    }
+}
+
+impl<T, const N: usize> Unpack for [T; N] where T: Unpack {
+    fn unpack<B>(mut buffer: &[u8]) -> Result<Self> where B: ByteOrder {
+        // Unfortunately, Rust doesn't provide a great way to initialize
+        // arrays dynamically without the overhead of double initialization
+        // (which additionally would require a `T: Default + Copy` bound
+        // or similar). Therefore we'll use uninitialized memory as per
+        // this trick: https://doc.rust-lang.org/nomicon/unchecked-uninit.html
+
+        let mut result: [MaybeUninit<T>; N] = unsafe {
+            MaybeUninit::uninit().assume_init()
+        };
+        
+        for i in 0..N {
+            result[i] = MaybeUninit::new(T::unpack::<B>(buffer)?);
+            buffer = &buffer[T::SIZE..];
+        }
+
+        // Unfortunately, we can't just transmute here as in the example
+        // since the array is generic over its size N:
+        // https://github.com/rust-lang/rust/issues/61956
+
+        // For this reason we will use the generic transmute workaround by lukaslihotzki:
+        // https://github.com/rust-lang/rust/issues/61956#issuecomment-1075275504
+
+        Ok(unsafe {
+            (&*(&MaybeUninit::new(result) as *const _ as *const MaybeUninit<_>)).assume_init_read()
+        })
     }
 }

@@ -77,3 +77,7 @@ impl<T> Size for &mut T where T: Size {
 impl<T> Size for Option<T> where T: Size {
     const SIZE: usize = T::SIZE + 1;
 }
+
+impl<T, const N: usize> Size for [T; N] where T: Size {
+    const SIZE: usize = T::SIZE * N;
+}

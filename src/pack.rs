@@ -134,3 +134,12 @@ impl<T> Pack for Option<T> where T: Pack {
         }
     }
 }
+
+impl<T, const N: usize> Pack for [T; N] where T: Pack {
+    fn pack<B>(&self, mut buffer: &mut [u8]) where B: ByteOrder {
+        for value in self {
+            value.pack::<B>(buffer);
+            buffer = &mut buffer[T::SIZE..];
+        }
+    }
+}

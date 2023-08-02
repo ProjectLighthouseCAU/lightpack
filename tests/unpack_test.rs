@@ -97,3 +97,13 @@ fn primitive_enums() {
     assert_eq!(Y::unpack::<BigEndian>(&[255, 255, 255, 247]), Ok(Y::A));
     assert_eq!(Y::unpack::<LittleEndian>(&[247, 255, 255, 255]), Ok(Y::A));
 }
+
+#[test]
+fn arrays() {
+    assert_eq!(<[u8; 0]>::unpack::<BigEndian>(&[]), Ok([]));
+    assert_eq!(<[_; 1]>::unpack::<BigEndian>(&[255]), Ok([-1i8]));
+    assert_eq!(<[_; 3]>::unpack::<BigEndian>(&[0, 0, 0, 16, 0, 0, 0, 16, 0, 0, 0, 16]), Ok([16u32; 3]));
+    assert_eq!(<[_; 5]>::unpack::<BigEndian>(&[3, 4, 1, 0, 2]), Ok([3u8, 4, 1, 0, 2]));
+    assert_eq!(<[_; 3]>::unpack::<LittleEndian>(&[2, 0, 3, 0, 255, 255]), Ok([2i16, 3, -1]));
+    assert_eq!(<[_; 3]>::unpack::<LittleEndian>(&[1, 0, 0, 0, 1, 1]), Ok([(true, false), (false, false), (true, true)]));
+}
