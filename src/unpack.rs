@@ -1,4 +1,4 @@
-use core::mem::MaybeUninit;
+use core::mem::{MaybeUninit, self};
 
 use byteorder::ByteOrder;
 
@@ -154,24 +154,36 @@ impl<T, const N: usize> Unpack for [T; N] where T: Unpack {
         // or similar). Therefore we'll use uninitialized memory as per
         // this trick: https://doc.rust-lang.org/nomicon/unchecked-uninit.html
 
+        if N == 0 {
+            // SAFETY: Empty arrays are always inhabited, without further invariants
+            return Ok(unsafe { mem::zeroed() });
+        }
+
+        // SAFETY: The type we are claimining to initialize is an array of `MaybeUninit`s
+        // which do not require initialization. For more details on this pattern
+        // see https://doc.rust-lang.org/nomicon/unchecked-uninit.html
         let mut result: [MaybeUninit<T>; N] = unsafe {
             MaybeUninit::uninit().assume_init()
         };
         
         for i in 0..N {
+            // NOTE: If `T::unpack` throws an error, then the `Drop` implementation of
+            // the already parsed `T`s will not be called. This could leak external
+            // resources held by those `T`s, but should otherwise not be unsafe. 
+            // See https://doc.rust-lang.org/nomicon/unchecked-uninit.html
+            // For plain-old data types, which we expect to be the dominant use-case,
+            // this is thus not an issue.
             result[i] = MaybeUninit::new(T::unpack::<B>(buffer)?);
             buffer = &buffer[T::SIZE..];
         }
 
-        // Unfortunately, we can't just transmute here as in the example
-        // since the array is generic over its size N:
-        // https://github.com/rust-lang/rust/issues/61956
-
-        // For this reason we will use the generic transmute workaround by lukaslihotzki:
-        // https://github.com/rust-lang/rust/issues/61956#issuecomment-1075275504
-
+        // SAFETY: We use the trick from https://github.com/bincode-org/bincode/blob/224e41274b/src/de/impl_core.rs#L184
+        // The array is initialized, `MaybeUninit<T>` and `T` have the same layout and
+        // `MaybeUninit` does drop drop, so transmuting `[MaybeUninit<T>; N]` to `[T; N]` is safe.
+        // We cannot use `mem::transmute` since the compiler doesn't accept it for generic lengths,
+        // see https://github.com/rust-lang/rust/issues/61956.
         Ok(unsafe {
-            (&*(&MaybeUninit::new(result) as *const _ as *const MaybeUninit<_>)).assume_init_read()
+            (&result as *const _ as *const [T; N]).read()
         })
     }
 }
