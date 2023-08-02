@@ -1,8 +1,12 @@
 [package]
 name = "lightpack-derive"
 description = "Implementation of #[derive(Size, Pack, Unpack)]"
+homepage = "https://github.com/ProjectLighthouseCAU/lightpack"
+repository = "https://github.com/ProjectLighthouseCAU/lightpack"
 version = "0.1.0"
 edition = "2021"
+categories = ["encoding", "no-std"]
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
