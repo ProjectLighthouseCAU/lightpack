@@ -1,5 +1,7 @@
+use std::sync::atomic::{AtomicUsize, Ordering, AtomicBool};
+
 use byteorder::{BigEndian, LittleEndian};
-use lightpack::{Unpack, Size, unpack::Error};
+use lightpack::{Unpack, Size, unpack::{Error, Result}};
 
 #[test]
 fn unsigned_ints() {
@@ -106,4 +108,53 @@ fn arrays() {
     assert_eq!(<[_; 5]>::unpack::<BigEndian>(&[3, 4, 1, 0, 2]), Ok([3u8, 4, 1, 0, 2]));
     assert_eq!(<[_; 3]>::unpack::<LittleEndian>(&[2, 0, 3, 0, 255, 255]), Ok([2i16, 3, -1]));
     assert_eq!(<[_; 3]>::unpack::<LittleEndian>(&[1, 0, 0, 0, 1, 1]), Ok([(true, false), (false, false), (true, true)]));
+}
+
+#[test]
+fn array_partial_dropping() {
+    // This makes sure that the mechanism to drop already-parsed elements
+    // works correctly (in the unsafe array unpack implementation).
+
+    static DROP_COUNTER: AtomicUsize = AtomicUsize::new(0);
+
+    // The test may only be invoked once per execution!
+    assert_eq!(DROP_COUNTER.load(Ordering::Relaxed), 0);
+
+    #[derive(PartialEq, Eq, Debug)]
+    struct Incrementor;
+
+    impl Drop for Incrementor {
+        fn drop(&mut self) {
+            DROP_COUNTER.fetch_add(1, Ordering::Relaxed);
+        }
+    }
+
+    impl Size for Incrementor {
+        const SIZE: usize = <(bool, u8)>::SIZE;
+    }
+
+    impl Unpack for Incrementor {
+        fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: byteorder::ByteOrder, Self: Sized {
+            let (succeed, i) = <(bool, u8)>::unpack::<B>(buffer)?;
+            if succeed {
+                Ok(Incrementor)
+            } else {
+                Err(Error::Custom(i as u32))
+            }
+        }
+    }
+
+    let buffer = [
+        // bool, u8
+        1, 0u8,
+        1, 1,
+        1, 2,
+        0, 3,
+        1, 4,
+    ];
+
+    let result = <[Incrementor; 10]>::unpack::<BigEndian>(&buffer);
+
+    assert_eq!(result, Err(Error::Custom(3)));
+    assert_eq!(DROP_COUNTER.load(Ordering::Relaxed), 3);
 }

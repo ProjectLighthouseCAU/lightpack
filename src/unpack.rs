@@ -16,6 +16,8 @@ pub enum Error {
     InvalidEnumValueI16(i16),
     InvalidEnumValueI32(i32),
     InvalidEnumValueI64(i64),
+    /// A user-defined error with some user-defined error code.
+    Custom(u32),
 }
 
 /// The result type for unpacked results.
