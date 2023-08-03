@@ -119,3 +119,11 @@ fn primitive_enums() {
     assert_roundtrips!(Y::C);
 }
 
+#[test]
+fn arrays() {
+    assert_roundtrips!([0; 0]);
+    assert_roundtrips!([3u16, 4, 23, 128, 9]);
+    assert_roundtrips!([true, false]);
+    assert_roundtrips!([(false, true), (true, true)]);
+    assert_roundtrips!(['H', 'e', 'l', 'l', 'o']);
+}
