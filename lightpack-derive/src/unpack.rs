@@ -2,7 +2,7 @@ use proc_macro2::{TokenStream, Span};
 use quote::quote;
 use syn::{DeriveInput, Data, Fields, Type, Ident, Expr};
 
-use crate::util::{repr_type, type_to_ident};
+use crate::util::{repr_type, type_to_ident, type_to_turbofish};
 
 pub fn derive_unpack(input: TokenStream) -> TokenStream {
     let input: DeriveInput = syn::parse2(input).expect("Could not parse derive input");
@@ -11,19 +11,19 @@ pub fn derive_unpack(input: TokenStream) -> TokenStream {
     let unpack_impl = match &input.data {
         Data::Struct(s) => match &s.fields {
             Fields::Named(fs) => {
-                let (fields, tys): (Vec<&Ident>, Vec<&Type>) = fs.named.iter()
-                    .map(|f| (f.ident.as_ref().expect("#[derive(Unpack)] requires fields to be named"), &f.ty))
+                let (fields, turbofish_tys): (Vec<&Ident>, Vec<Type>) = fs.named.iter()
+                    .map(|f| (f.ident.as_ref().expect("#[derive(Unpack)] requires fields to be named"), type_to_turbofish(f.ty.clone())))
                     .unzip();
                 quote! {
-                    #(let #fields = #tys::unpack::<B>(buffer)?; let buffer = &buffer[#tys::SIZE..];)*
+                    #(let #fields = #turbofish_tys::unpack::<B>(buffer)?; let buffer = &buffer[#turbofish_tys::SIZE..];)*
                     Ok(#name { #(#fields),* })
                 }
             },
             Fields::Unnamed(fs) => {
                 let vars: Vec<Ident> = (0..fs.unnamed.len()).map(|i| Ident::new(&format!("x{}", i), Span::call_site())).collect();
-                let tys: Vec<Type> = fs.unnamed.iter().map(|f| f.ty.clone()).collect();
+                let turbofish_tys: Vec<Type> = fs.unnamed.iter().map(|f| type_to_turbofish(f.ty.clone())).collect();
                 quote! {
-                    #(let #vars = #tys::unpack::<B>(buffer)?; let buffer = &buffer[#tys::SIZE..];)*
+                    #(let #vars = #turbofish_tys::unpack::<B>(buffer)?; let buffer = &buffer[#turbofish_tys::SIZE..];)*
                     Ok(#name(#(#vars),*))
                 }
             },

@@ -63,8 +63,23 @@ fn generic_structs() {
         right: R,
     }
 
+    #[derive(Size, Unpack, Debug, PartialEq, Eq)]
+    #[allow(dead_code)]
+    struct HasField {
+        wrap: Wrap<u32>,
+    }
+
+    #[derive(Size, Unpack, Debug, PartialEq, Eq)]
+    #[allow(dead_code)]
+    struct HasGenericField<T> {
+        wrap: Wrap<T>,
+        x: bool,
+    }
+
     assert_eq!(Wrap::unpack::<LittleEndian>(&[3, 0, 0, 0]), Ok(Wrap(3i32)));
     assert_eq!(Wrap::unpack::<BigEndian>(&[0, 4]), Ok(Wrap(4u16)));
+    assert_eq!(HasField::unpack::<BigEndian>(&[0, 0, 0, 9]), Ok(HasField { wrap: Wrap(9u32) }));
+    assert_eq!(HasGenericField::unpack::<BigEndian>(&[1, 1]), Ok(HasGenericField { wrap: Wrap(true), x: true }));
 
     let buffer = [9, 8, 3];
     assert_eq!(
