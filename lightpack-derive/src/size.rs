@@ -22,7 +22,7 @@ pub fn derive_size(input: TokenStream) -> TokenStream {
 
             field_tys.into_iter()
                 .map(type_to_turbofish)
-                .map(|t| quote! { #t::SIZE })
+                .map(|t| quote! { <#t>::SIZE })
                 .reduce(|e1, e2| quote! { #e1 + #e2 })
                 .unwrap_or_else(|| quote! { 0 })
         },
@@ -31,7 +31,7 @@ pub fn derive_size(input: TokenStream) -> TokenStream {
                 .expect("#[derive(Size)] currently only supports enums with a #[repr]");
 
             quote! {
-                #repr_type::SIZE
+                <#repr_type>::SIZE
             }
         },
         Data::Union(_) => unimplemented!("#[derive(Size)] is not supported for unions yet!"),

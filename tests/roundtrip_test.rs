@@ -143,3 +143,11 @@ fn arrays() {
     assert_roundtrips!([(false, true), (true, true)]);
     assert_roundtrips!(['H', 'e', 'l', 'l', 'o']);
 }
+
+#[test]
+fn tuple_struct_array() {
+    #[derive(Size, Pack, Unpack, Debug, PartialEq, Eq)]
+    struct Echo([u8; 4]);
+
+    assert_roundtrips!(Echo([0, 1, 2, 3]));
+}

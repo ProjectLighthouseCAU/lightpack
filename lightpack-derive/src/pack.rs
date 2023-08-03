@@ -34,7 +34,7 @@ pub fn derive_pack(input: TokenStream) -> TokenStream {
                 .map(type_to_turbofish);
 
             quote! {
-                #(#fields.pack::<B>(buffer); let buffer = &mut buffer[#turbofish_tys::SIZE..];)*
+                #(#fields.pack::<B>(buffer); let buffer = &mut buffer[<#turbofish_tys>::SIZE..];)*
             }
         },
         Data::Enum(_) => {

@@ -15,7 +15,7 @@ pub fn derive_unpack(input: TokenStream) -> TokenStream {
                     .map(|f| (f.ident.as_ref().expect("#[derive(Unpack)] requires fields to be named"), type_to_turbofish(f.ty.clone())))
                     .unzip();
                 quote! {
-                    #(let #fields = #turbofish_tys::unpack::<B>(buffer)?; let buffer = &buffer[#turbofish_tys::SIZE..];)*
+                    #(let #fields = <#turbofish_tys>::unpack::<B>(buffer)?; let buffer = &buffer[<#turbofish_tys>::SIZE..];)*
                     Ok(#name { #(#fields),* })
                 }
             },
@@ -23,7 +23,7 @@ pub fn derive_unpack(input: TokenStream) -> TokenStream {
                 let vars: Vec<Ident> = (0..fs.unnamed.len()).map(|i| Ident::new(&format!("x{}", i), Span::call_site())).collect();
                 let turbofish_tys: Vec<Type> = fs.unnamed.iter().map(|f| type_to_turbofish(f.ty.clone())).collect();
                 quote! {
-                    #(let #vars = #turbofish_tys::unpack::<B>(buffer)?; let buffer = &buffer[#turbofish_tys::SIZE..];)*
+                    #(let #vars = <#turbofish_tys>::unpack::<B>(buffer)?; let buffer = &buffer[<#turbofish_tys>::SIZE..];)*
                     Ok(#name(#(#vars),*))
                 }
             },
