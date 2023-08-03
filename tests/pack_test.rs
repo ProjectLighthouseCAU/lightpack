@@ -74,9 +74,24 @@ fn generic_structs() {
         right: R,
     }
 
+    #[derive(Size, Pack)]
+    #[allow(dead_code)]
+    struct HasField {
+        wrap: Wrap<u32>,
+    }
+
+    #[derive(Size, Pack)]
+    #[allow(dead_code)]
+    struct HasGenericField<T> {
+        wrap: Wrap<T>,
+        x: bool,
+    }
+
     assert_eq!(pack_vec::<LittleEndian, _>(Wrap(3i32)), vec![3, 0, 0, 0]);
     assert_eq!(pack_vec::<BigEndian, _>(Wrap(4u16)), vec![0, 4]);
     assert_eq!(pack_vec::<BigEndian, _>(Pair { left: -4i16, right: 3u8 }), pack_vec::<BigEndian, _>((-4i16, 3u8)));
+    assert_eq!(pack_vec::<BigEndian, _>(HasField { wrap: Wrap(4u32) }), vec![0, 0, 0, 4]);
+    assert_eq!(pack_vec::<LittleEndian, _>(HasGenericField { wrap: Wrap(false), x: true }), vec![0, 1]);
 }
 
 #[test]

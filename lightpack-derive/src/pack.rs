@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{DeriveInput, Data, Fields, Index, Ident, Type};
 
-use crate::util::repr_type;
+use crate::util::{repr_type, type_to_turbofish};
 
 pub fn derive_pack(input: TokenStream) -> TokenStream {
     let input: DeriveInput = syn::parse2(input).expect("Could not parse derive input");
@@ -29,8 +29,12 @@ pub fn derive_pack(input: TokenStream) -> TokenStream {
                 Fields::Unit => (Vec::new(), Vec::new()),
             };
 
+            let turbofish_tys = tys.into_iter()
+                .cloned()
+                .map(type_to_turbofish);
+
             quote! {
-                #(#fields.pack::<B>(buffer); let buffer = &mut buffer[#tys::SIZE..];)*
+                #(#fields.pack::<B>(buffer); let buffer = &mut buffer[#turbofish_tys::SIZE..];)*
             }
         },
         Data::Enum(_) => {
