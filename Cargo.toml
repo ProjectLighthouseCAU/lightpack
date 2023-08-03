@@ -3,7 +3,7 @@ name = "lightpack"
 description = "A lightweight, no-std binary serialization library"
 homepage = "https://github.com/ProjectLighthouseCAU/lightpack"
 repository = "https://github.com/ProjectLighthouseCAU/lightpack"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 categories = ["encoding", "no-std"]
 keywords = ["binary", "serialization", "deserialization", "no-std"]
@@ -12,7 +12,7 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-lightpack-derive = { version = "0.1.1", path = "lightpack-derive" }
+lightpack-derive = { version = "0.2.0", path = "lightpack-derive" }
 byteorder = { workspace = true }
 
 [workspace]
