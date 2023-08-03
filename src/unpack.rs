@@ -165,21 +165,45 @@ impl<T, const N: usize> Unpack for [T; N] where T: Unpack {
         let mut result: [MaybeUninit<T>; N] = unsafe {
             MaybeUninit::uninit().assume_init()
         };
+
+        // NOTE: If `T::unpack` throws an error in the loop, we need to make
+        // sure that the already parsed `T`s will be dropped. Therefore we'll
+        // use a `Guard` that drops all parsed `T`s if the function exits
+        // before the array is fully parsed (and `mem::forget` is called).
+
+        // Inspired by https://github.com/bincode-org/bincode/blob/224e41274b/src/de/impl_core.rs#L31
+        // which is MIT-licensed (Copyright (c) 2014 Ty Overby).
+
+        struct Guard<'a, T, const N: usize> {
+            result: &'a mut [MaybeUninit<T>; N],
+            initialized_count: usize,
+        }
+
+        impl<'a, T, const N: usize> Drop for Guard<'a, T, N> {
+            fn drop(&mut self) {
+                // SAFETY: The first `initialized_count` values are guaranteed to be initialized,
+                // see the for-loop. The cast to `*mut [T]` is safe since `MaybeUninit<T>` and `T`
+                // have the same memory layout and we have mutable/exclusive access already.
+                unsafe {
+                    let initialized: &mut [MaybeUninit<T>] = self.result.get_unchecked_mut(..self.initialized_count);
+                    core::ptr::drop_in_place(initialized as *mut [MaybeUninit<T>] as *mut [T]);
+                }
+            }
+        }
+
+        let mut guard = Guard { result: &mut result, initialized_count: 0 };
         
         for i in 0..N {
-            // NOTE: If `T::unpack` throws an error, then the `Drop` implementation of
-            // the already parsed `T`s will not be called. This could leak external
-            // resources held by those `T`s, but should otherwise not be unsafe. 
-            // See https://doc.rust-lang.org/nomicon/unchecked-uninit.html
-            // For plain-old data types, which we expect to be the dominant use-case,
-            // this is thus not an issue.
-            result[i] = MaybeUninit::new(T::unpack::<B>(buffer)?);
+            guard.result[i] = MaybeUninit::new(T::unpack::<B>(buffer)?);
+            guard.initialized_count += 1;
             buffer = &buffer[T::SIZE..];
         }
 
-        // SAFETY: We use the trick from https://github.com/bincode-org/bincode/blob/224e41274b/src/de/impl_core.rs#L184
-        // The array is initialized, `MaybeUninit<T>` and `T` have the same layout and
-        // `MaybeUninit` does drop drop, so transmuting `[MaybeUninit<T>; N]` to `[T; N]` is safe.
+        // The array is fully initialized, so skip dropping the parsed `T`s.
+        mem::forget(guard);
+
+        // SAFETY: The array is initialized, `MaybeUninit<T>` and `T` have the same layout and
+        // `MaybeUninit` does not drop, so transmuting `[MaybeUninit<T>; N]` to `[T; N]` is safe.
         // We cannot use `mem::transmute` since the compiler doesn't accept it for generic lengths,
         // see https://github.com/rust-lang/rust/issues/61956.
         Ok(unsafe {
