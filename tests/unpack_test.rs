@@ -1,4 +1,4 @@
-use std::sync::atomic::{AtomicUsize, Ordering, AtomicBool};
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use byteorder::{BigEndian, LittleEndian};
 use lightpack::{Unpack, Size, unpack::{Error, Result}};
