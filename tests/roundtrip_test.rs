@@ -86,9 +86,25 @@ fn generic_structs() {
         right: R,
     }
 
+    #[derive(Size, Pack, Unpack, Debug, PartialEq, Eq)]
+    #[allow(dead_code)]
+    struct HasField {
+        wrap: Wrap<u32>,
+    }
+
+    #[derive(Size, Pack, Unpack, Debug, PartialEq, Eq)]
+    #[allow(dead_code)]
+    struct HasGenericField<T> {
+        wrap: Wrap<T>,
+        x: bool,
+    }
+
     assert_roundtrips!(Wrap(-1i8));
     assert_roundtrips!(Wrap(13u16));
     assert_roundtrips!(Pair { left: Wrap(23i64), right: Wrap(274u32) });
+    assert_roundtrips!(HasField { wrap: Wrap(98) });
+    assert_roundtrips!(HasGenericField { wrap: Wrap((true, false)), x: false });
+    assert_roundtrips!(HasGenericField { wrap: Wrap([(1i16, 2), (9, 3)]), x: true });
 }
 
 #[test]
