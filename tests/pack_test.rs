@@ -134,3 +134,15 @@ fn fixed_endianness() {
     assert_eq!(pack_vec::<BigEndian, _>(LE(45u16)), pack_vec::<LittleEndian, u16>(45));
     assert_eq!(pack_vec::<LittleEndian, _>(LE(45u16)), pack_vec::<LittleEndian, u16>(45));
 }
+
+#[test]
+fn mixed_endianness() {
+    #[derive(Size, Pack)]
+    struct Mixed {
+        le: LE<u16>,
+        be: BE<u16>,
+    }
+
+    assert_eq!(pack_vec::<BigEndian, _>(Mixed { le: LE(256), be: BE(256) }), vec![0, 1, 1, 0]);
+    assert_eq!(pack_vec::<LittleEndian, _>(Mixed { le: LE(256), be: BE(256) }), vec![0, 1, 1, 0]);
+}
