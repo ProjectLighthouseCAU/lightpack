@@ -1,0 +1,13 @@
+[package]
+name = "lightpack-extra"
+description = "Additional utilities for Lightpack"
+homepage = "https://github.com/ProjectLighthouseCAU/lightpack"
+repository = "https://github.com/ProjectLighthouseCAU/lightpack"
+version = "0.2.3"
+edition = "2021"
+categories = ["encoding", "no-std"]
+license = "MIT"
+
+[dependencies]
+lightpack = { version = "0.2.3", path = ".." }
+byteorder = { workspace = true }
