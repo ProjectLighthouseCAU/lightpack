@@ -18,7 +18,6 @@ byteorder = { workspace = true }
 [workspace]
 members = [
     "lightpack-derive",
-    "lightpack-extra",
 ]
 
 [workspace.dependencies]

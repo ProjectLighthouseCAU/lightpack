@@ -1,13 +1,22 @@
 use byteorder::{LittleEndian, BigEndian, ByteOrder};
-use lightpack::{Size, Pack, Unpack, unpack::Result};
+
+use crate::{Size, Pack, Unpack, unpack::Result};
 
 /// A wrapper that always encodes the type as little endian.
-#[derive(Size)]
-pub struct LE<T>(T);
+#[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Clone, Copy)]
+pub struct LE<T>(pub T);
 
 /// A wrapper that always encodes the type as big endian.
-#[derive(Size)]
-pub struct BE<T>(T);
+#[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Clone, Copy)]
+pub struct BE<T>(pub T);
+
+impl<T> Size for LE<T> where T: Size {
+    const SIZE: usize = T::SIZE;
+}
+
+impl<T> Size for BE<T> where T: Size {
+    const SIZE: usize = T::SIZE;
+}
 
 impl<T> Pack for LE<T> where T: Pack {
     fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
@@ -32,5 +41,3 @@ impl<T> Unpack for BE<T> where T: Unpack {
         Ok(Self(T::unpack::<BigEndian>(buffer)?))
     }
 }
-
-// TODO: Write unit tests

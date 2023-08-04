@@ -1,5 +1,5 @@
 use byteorder::{ByteOrder, BigEndian, LittleEndian};
-use lightpack::{Pack, Size};
+use lightpack::{Pack, Size, extra::{BE, LE}};
 
 fn pack_vec<B, P>(value: P) -> Vec<u8> where B: ByteOrder, P: Pack {
     let mut buffer = vec![0u8; P::SIZE];
@@ -125,4 +125,12 @@ fn arrays() {
     assert_eq!(pack_vec::<BigEndian, _>([3u8, 4, 1, 0, 2]), vec![3, 4, 1, 0, 2]);
     assert_eq!(pack_vec::<LittleEndian, _>([2i16, 3, -1]), vec![2, 0, 3, 0, 255, 255]);
     assert_eq!(pack_vec::<LittleEndian, _>([(true, false), (false, false), (true, true)]), vec![1, 0, 0, 0, 1, 1]);
+}
+
+#[test]
+fn fixed_endianness() {
+    assert_eq!(pack_vec::<BigEndian, _>(BE(45u16)), pack_vec::<BigEndian, u16>(45));
+    assert_eq!(pack_vec::<LittleEndian, _>(BE(45u16)), pack_vec::<BigEndian, u16>(45));
+    assert_eq!(pack_vec::<BigEndian, _>(LE(45u16)), pack_vec::<LittleEndian, u16>(45));
+    assert_eq!(pack_vec::<LittleEndian, _>(LE(45u16)), pack_vec::<LittleEndian, u16>(45));
 }

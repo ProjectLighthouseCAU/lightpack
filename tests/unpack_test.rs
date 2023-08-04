@@ -1,7 +1,7 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use byteorder::{BigEndian, LittleEndian};
-use lightpack::{Unpack, Size, unpack::{Error, Result}};
+use lightpack::{Unpack, Size, unpack::{Error, Result}, extra::{BE, LE}};
 
 #[test]
 fn unsigned_ints() {
@@ -172,4 +172,12 @@ fn array_partial_dropping() {
 
     assert_eq!(result, Err(Error::Custom(3)));
     assert_eq!(DROP_COUNTER.load(Ordering::Relaxed), 3);
+}
+
+#[test]
+fn fixed_endianness() {
+    assert_eq!(BE::<u16>::unpack::<BigEndian>(&[0, 4]), Ok(BE(4)));
+    assert_eq!(BE::<u16>::unpack::<LittleEndian>(&[0, 4]), Ok(BE(4)));
+    assert_eq!(LE::<u16>::unpack::<BigEndian>(&[4, 0]), Ok(LE(4)));
+    assert_eq!(LE::<u16>::unpack::<LittleEndian>(&[4, 0]), Ok(LE(4)));
 }
