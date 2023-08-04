@@ -9,7 +9,7 @@
 //! 
 //! These traits can be derived to make your own structures encodable and decodable:
 //! 
-//! ```
+//! ```ignore
 //! #[derive(Size, Pack, Unpack)]
 //! struct Point {
 //!     x: i16,
@@ -19,7 +19,7 @@
 //! 
 //! To encode, call `pack` with an endianness (e.g. `lightpack::byteorder::BigEndian`) on a `&mut [u8]` slice:
 //! 
-//! ```
+//! ```ignore
 //! let mut buffer = [0u8; Point::SIZE];
 //! Point { x: 3, y: 4 }.pack::<BigEndian>(&mut buffer);
 //! // => buffer == [0, 3, 0, 4]
@@ -27,7 +27,7 @@
 //! 
 //! To decode, call `unpack` on a `&[u8]` slice:
 //! 
-//! ```
+//! ```ignore
 //! Point::unpack::<BigEndian>(&[0, 3, 0, 4]).unwrap()
 //! // => Point { x: 3, y: 4 }
 //! ```
