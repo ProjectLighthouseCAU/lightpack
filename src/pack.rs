@@ -1,3 +1,5 @@
+//! The [`Pack`] trait and primitive implementations.
+
 use byteorder::ByteOrder;
 
 use crate::Size;

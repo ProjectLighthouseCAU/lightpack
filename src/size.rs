@@ -1,3 +1,5 @@
+//! The [`Size`] trait and primitive implementations.
+
 /// Types that have an encoded size.
 pub trait Size {
     /// The type's encoded size in bytes.

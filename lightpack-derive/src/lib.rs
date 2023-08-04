@@ -1,3 +1,9 @@
+//! This crates provides Lightpack's derive macros, i.e.
+//! 
+//! ```
+//! #[derive(Size, Pack, Unpack)] 
+//! ```
+
 mod pack;
 mod size;
 mod unpack;

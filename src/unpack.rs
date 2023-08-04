@@ -1,3 +1,5 @@
+//! The [`Unpack`] trait and primitive implementations.
+
 use core::mem::{MaybeUninit, self};
 
 use byteorder::ByteOrder;

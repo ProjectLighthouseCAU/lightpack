@@ -1,3 +1,5 @@
+//! Additional utilities.
+
 use byteorder::{LittleEndian, BigEndian, ByteOrder};
 
 use crate::{Size, Pack, Unpack, unpack::Result};
