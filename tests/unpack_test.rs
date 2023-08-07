@@ -1,7 +1,7 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use byteorder::{BigEndian, LittleEndian};
-use lightpack::{Unpack, Size, unpack::{Error, Result}, extra::{BE, LE}};
+use lightpack::{Unpack, Size, unpack::{Error, Result}, extra::{BE, LE, UnpackInto}};
 
 #[test]
 fn unsigned_ints() {
@@ -180,4 +180,5 @@ fn fixed_endianness() {
     assert_eq!(BE::<u16>::unpack::<LittleEndian>(&[0, 4]), Ok(BE(4)));
     assert_eq!(LE::<u16>::unpack::<BigEndian>(&[4, 0]), Ok(LE(4)));
     assert_eq!(LE::<u16>::unpack::<LittleEndian>(&[4, 0]), Ok(LE(4)));
+    assert_eq!((&[4, 0]).unpack_into::<BigEndian>(), Ok(LE(4u16)));
 }

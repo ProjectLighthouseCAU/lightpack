@@ -2,7 +2,7 @@
 
 use byteorder::{LittleEndian, BigEndian, ByteOrder};
 
-use crate::{Size, Pack, Unpack, unpack::Result};
+use crate::{Size, Pack, Unpack, unpack::{Result, self}};
 
 /// A wrapper that always encodes the type as little endian.
 #[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Clone, Copy)]
@@ -41,5 +41,17 @@ impl<T> Unpack for LE<T> where T: Unpack {
 impl<T> Unpack for BE<T> where T: Unpack {
     fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
         Ok(Self(T::unpack::<BigEndian>(buffer)?))
+    }
+}
+
+/// A small convenience trait similar to [`Into`] and [`TryInto`].
+pub trait UnpackInto<T> {
+    /// Decodes to a target type.
+    fn unpack_into<B>(self) -> unpack::Result<T> where B: ByteOrder;
+}
+
+impl<T> UnpackInto<T> for &[u8] where T: Unpack {
+    fn unpack_into<B>(self) -> unpack::Result<T> where B: ByteOrder {
+        T::unpack::<B>(self)
     }
 }
