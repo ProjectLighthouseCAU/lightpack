@@ -55,3 +55,17 @@ impl<T> UnpackInto<T> for &[u8] where T: Unpack {
         T::unpack::<B>(self)
     }
 }
+
+/// A small convenience trait that combines [`Pack`] and [`Size`].
+pub trait PackSize {
+    /// Encodes `self` to a binary representation and
+    /// returns the encoded size.
+    fn pack_size<B>(&self, buffer: &mut [u8]) -> usize where B: ByteOrder;
+}
+
+impl<T> PackSize for T where T: Pack {
+    fn pack_size<B>(&self, buffer: &mut [u8]) -> usize where B: ByteOrder {
+        self.pack::<B>(buffer);
+        T::SIZE
+    }
+}
