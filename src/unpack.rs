@@ -18,6 +18,7 @@ pub enum Error {
     InvalidEnumValueI16(i16),
     InvalidEnumValueI32(i32),
     InvalidEnumValueI64(i64),
+    BufferTooSmall { actual: usize, expected: usize },
     /// A user-defined error with some user-defined error code.
     Custom(u32),
 }
@@ -28,7 +29,17 @@ pub type Result<T> = core::result::Result<T, Error>;
 /// Types that can be decoded from a binary representation.
 pub trait Unpack: Size {
     /// Decodes the type from a binary representation.
+    /// Panics if the buffer is too small.
     fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder, Self: Sized;
+
+    /// Decodes the type and returns an error if the buffer is too small.
+    fn unpack_safely<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder, Self: Sized {
+        if buffer.len() < Self::SIZE {
+            Err(Error::BufferTooSmall { actual: buffer.len(), expected: Self::SIZE })
+        } else {
+            Self::unpack::<B>(buffer)
+        }
+    }
 }
 
 impl Unpack for u8 {
