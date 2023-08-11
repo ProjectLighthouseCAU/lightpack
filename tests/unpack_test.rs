@@ -180,7 +180,6 @@ fn fixed_endianness() {
     assert_eq!(BE::<u16>::unpack::<LittleEndian>(&[0, 4]), Ok(BE(4)));
     assert_eq!(LE::<u16>::unpack::<BigEndian>(&[4, 0]), Ok(LE(4)));
     assert_eq!(LE::<u16>::unpack::<LittleEndian>(&[4, 0]), Ok(LE(4)));
-    assert_eq!((&[4, 0]).unpack_into::<BigEndian>(), Ok(LE(4u16)));
 }
 
 #[test]
@@ -188,4 +187,11 @@ fn unpack_safely() {
     let buffer = [2u8, 0];
     assert_eq!(u16::unpack_safely::<LittleEndian>(&buffer), Ok(2));
     assert_eq!(u32::unpack_safely::<LittleEndian>(&buffer), Err(Error::BufferTooSmall { actual: 2, expected: 4 }));
+}
+
+#[test]
+fn unpack_into() {
+    assert_eq!((&[4, 0]).unpack_into::<BigEndian>(), Ok(LE(4u16)));
+    assert_eq!((&[4, 0]).unpack_safely_into::<BigEndian>(), Ok(LE(4u16)));
+    assert_eq!((&[4]).unpack_safely_into::<BigEndian>(), Result::<u16>::Err(Error::BufferTooSmall { actual: 1, expected: 2 }));
 }

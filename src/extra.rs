@@ -46,13 +46,20 @@ impl<T> Unpack for BE<T> where T: Unpack {
 
 /// A small convenience trait similar to [`Into`] and [`TryInto`].
 pub trait UnpackInto<T> {
-    /// Decodes to a target type.
+    /// Decodes to a target type. May panic if the buffer is too small.
     fn unpack_into<B>(self) -> unpack::Result<T> where B: ByteOrder;
+
+    /// Decodes to a target type, erroring if the buffer is too small.
+    fn unpack_safely_into<B>(self) -> unpack::Result<T> where B: ByteOrder;
 }
 
 impl<T> UnpackInto<T> for &[u8] where T: Unpack {
     fn unpack_into<B>(self) -> unpack::Result<T> where B: ByteOrder {
         T::unpack::<B>(self)
+    }
+
+    fn unpack_safely_into<B>(self) -> unpack::Result<T> where B: ByteOrder {
+        T::unpack_safely::<B>(self)
     }
 }
 
