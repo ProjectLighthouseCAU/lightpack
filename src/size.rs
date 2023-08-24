@@ -38,6 +38,14 @@ impl Size for i64 {
     const SIZE: usize = 8;
 }
 
+impl Size for f32 {
+    const SIZE: usize = 4;
+}
+
+impl Size for f64 {
+    const SIZE: usize = 8;
+}
+
 impl Size for bool {
     const SIZE: usize = 1;
 }

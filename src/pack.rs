@@ -60,6 +60,18 @@ impl Pack for i64 {
     }
 }
 
+impl Pack for f32 {
+    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
+        B::write_f32(buffer, *self)
+    }
+}
+
+impl Pack for f64 {
+    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
+        B::write_f64(buffer, *self)
+    }
+}
+
 impl Pack for bool {
     fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
         buffer[0] = *self as u8;

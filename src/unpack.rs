@@ -90,6 +90,18 @@ impl Unpack for i64 {
     }
 }
 
+impl Unpack for f32 {
+    fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
+        Ok(B::read_f32(buffer))
+    }
+}
+
+impl Unpack for f64 {
+    fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
+        Ok(B::read_f64(buffer))
+    }
+}
+
 impl Unpack for bool {
     fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
         Ok(buffer[0] != 0)

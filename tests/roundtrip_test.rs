@@ -1,3 +1,5 @@
+use std::{f32, f64};
+
 use byteorder::{ByteOrder, BigEndian, LittleEndian};
 use lightpack::{Pack, Unpack, Size};
 
@@ -37,6 +39,26 @@ fn signed_ints() {
     assert_roundtrips!(3000i32);
     assert_roundtrips!(i32::MIN);
     assert_roundtrips!(i32::MAX);
+}
+
+#[test]
+fn floats() {
+    assert_roundtrips!(0.0f32);
+    assert_roundtrips!(0.0f64);
+    assert_roundtrips!(1.02f32);
+    assert_roundtrips!(1.02f64);
+    assert_roundtrips!(1e30f32);
+    assert_roundtrips!(1e100f64);
+    assert_roundtrips!(-0.0f32);
+    assert_roundtrips!(-0.0f64);
+    assert_roundtrips!(f32::INFINITY);
+    assert_roundtrips!(f32::NEG_INFINITY);
+    assert_roundtrips!(f64::INFINITY);
+    assert_roundtrips!(f64::NEG_INFINITY);
+    assert_roundtrips!(f32::consts::PI);
+    assert_roundtrips!(-f64::consts::PI);
+
+    // NOTE: NaN != NaN, therefore we unfortunately can't test that...
 }
 
 #[test]
