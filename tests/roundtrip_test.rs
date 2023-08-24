@@ -9,11 +9,31 @@ fn roundtrip<B, P>(value: P) -> P where B: ByteOrder, P: Pack + Unpack {
     P::unpack::<B>(&buffer).unwrap()
 }
 
+fn roundtrip_packed<B, P>(value: P) -> (Vec<u8>, Vec<u8>) where B: ByteOrder, P: Pack + Unpack {
+    let mut buffer = vec![0u8; P::SIZE];
+    value.pack::<B>(&mut buffer);
+    let unpacked = P::unpack::<B>(&buffer).unwrap();
+    let mut buffer2 = vec![0u8; P::SIZE];
+    unpacked.pack::<B>(&mut buffer2);
+    (buffer, buffer2)
+}
+
 macro_rules! assert_roundtrips {
     ($x:expr) => {
         {
             assert_eq!(roundtrip::<BigEndian, _>($x), $x);
             assert_eq!(roundtrip::<LittleEndian, _>($x), $x);
+        }
+    };
+}
+
+macro_rules! assert_roundtrips_packed {
+    ($x:expr) => {
+        {
+            let (x1, x2) = roundtrip_packed::<BigEndian, _>($x);
+            assert_eq!(x1, x2);
+            let (x1, x2) = roundtrip_packed::<LittleEndian, _>($x);
+            assert_eq!(x1, x2);
         }
     };
 }
@@ -58,7 +78,9 @@ fn floats() {
     assert_roundtrips!(f32::consts::PI);
     assert_roundtrips!(-f64::consts::PI);
 
-    // NOTE: NaN != NaN, therefore we unfortunately can't test that...
+    // NOTE: NaN != NaN, therefore we need to test for equality on the packed representation
+    assert_roundtrips_packed!(f32::NAN);
+    assert_roundtrips_packed!(f64::NAN);
 }
 
 #[test]
