@@ -34,6 +34,7 @@ fn basic_structs() {
     }
 
     #[derive(Size)]
+    #[allow(unused)]
     struct Tuple(X, Y);
 
     #[derive(Size)]
