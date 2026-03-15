@@ -3,6 +3,7 @@
 use core::mem::{MaybeUninit, self};
 
 use byteorder::ByteOrder;
+use pastey::paste;
 
 use crate::Size;
 
@@ -42,29 +43,25 @@ pub trait Unpack: Size {
     }
 }
 
+macro_rules! impl_unpack_number {
+    ($t:ty) => {
+        impl Unpack for $t {
+            fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder, Self: Sized {
+                paste!{ Ok(B::[<read_$t>](buffer)) }
+            }
+        }
+    };
+}
+
 impl Unpack for u8 {
     fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
         Ok(buffer[0])
     }
 }
 
-impl Unpack for u16 {
-    fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
-        Ok(B::read_u16(buffer))
-    }
-}
-
-impl Unpack for u32 {
-    fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
-        Ok(B::read_u32(buffer))
-    }
-}
-
-impl Unpack for u64 {
-    fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
-        Ok(B::read_u64(buffer))
-    }
-}
+impl_unpack_number!(u16);
+impl_unpack_number!(u32);
+impl_unpack_number!(u64);
 
 impl Unpack for i8 {
     fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
@@ -72,35 +69,12 @@ impl Unpack for i8 {
     }
 }
 
-impl Unpack for i16 {
-    fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
-        Ok(B::read_i16(buffer))
-    }
-}
+impl_unpack_number!(i16);
+impl_unpack_number!(i32);
+impl_unpack_number!(i64);
 
-impl Unpack for i32 {
-    fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
-        Ok(B::read_i32(buffer))
-    }
-}
-
-impl Unpack for i64 {
-    fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
-        Ok(B::read_i64(buffer))
-    }
-}
-
-impl Unpack for f32 {
-    fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
-        Ok(B::read_f32(buffer))
-    }
-}
-
-impl Unpack for f64 {
-    fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
-        Ok(B::read_f64(buffer))
-    }
-}
+impl_unpack_number!(f32);
+impl_unpack_number!(f64);
 
 impl Unpack for bool {
     fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
@@ -115,7 +89,25 @@ impl Unpack for char {
     }
 }
 
-// TODO: Abstract over the tuple size with a macro
+macro_rules! impl_unpack_tuple {
+    ($($idx:tt),*) => {
+        paste! {
+            impl<$([<T$idx>],)*> Unpack for ($([<T$idx>],)*)
+            where
+                $([<T$idx>]: Unpack,)*
+            {
+                #[allow(unused)] // because we generate one more "let buffer = ..." statement than we need
+                fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
+                    $(
+                        let [<t$idx>] = [<T$idx>]::unpack::<B>(buffer)?;
+                        let buffer = &buffer[[<T$idx>]::SIZE..];
+                    )*
+                    Ok(($([<t$idx>],)*))
+                }
+            }
+        }
+    };
+}
 
 impl Unpack for () {
     fn unpack<B>(_buffer: &[u8]) -> Result<Self> where B: ByteOrder {
@@ -123,44 +115,10 @@ impl Unpack for () {
     }
 }
 
-impl<T0> Unpack for (T0,) where T0: Unpack {
-    fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
-        Ok((T0::unpack::<B>(buffer)?,))
-    }
-}
-
-impl<T0, T1> Unpack for (T0, T1) where T0: Unpack, T1: Unpack {
-    fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
-        let x0 = T0::unpack::<B>(buffer)?;
-        let buffer = &buffer[T0::SIZE..];
-        let x1 = T1::unpack::<B>(buffer)?;
-        Ok((x0, x1))
-    }
-}
-
-impl<T0, T1, T2> Unpack for (T0, T1, T2) where T0: Unpack, T1: Unpack, T2: Unpack {
-    fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
-        let x0 = T0::unpack::<B>(buffer)?;
-        let buffer = &buffer[T0::SIZE..];
-        let x1 = T1::unpack::<B>(buffer)?;
-        let buffer = &buffer[T1::SIZE..];
-        let x2 = T2::unpack::<B>(buffer)?;
-        Ok((x0, x1, x2))
-    }
-}
-
-impl<T0, T1, T2, T3> Unpack for (T0, T1, T2, T3) where T0: Unpack, T1: Unpack, T2: Unpack, T3: Unpack {
-    fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {
-        let x0 = T0::unpack::<B>(buffer)?;
-        let buffer = &buffer[T0::SIZE..];
-        let x1 = T1::unpack::<B>(buffer)?;
-        let buffer = &buffer[T1::SIZE..];
-        let x2 = T2::unpack::<B>(buffer)?;
-        let buffer = &buffer[T2::SIZE..];
-        let x3 = T3::unpack::<B>(buffer)?;
-        Ok((x0, x1, x2, x3))
-    }
-}
+impl_unpack_tuple!(0);
+impl_unpack_tuple!(0, 1);
+impl_unpack_tuple!(0, 1, 2);
+impl_unpack_tuple!(0, 1, 2, 3);
 
 impl<T> Unpack for Option<T> where T: Unpack {
     fn unpack<B>(buffer: &[u8]) -> Result<Self> where B: ByteOrder {

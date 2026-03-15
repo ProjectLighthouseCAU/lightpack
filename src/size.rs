@@ -1,80 +1,67 @@
 //! The [`Size`] trait and primitive implementations.
 
+use core::mem::size_of;
+use pastey::paste;
+
 /// Types that have an encoded size.
 pub trait Size {
     /// The type's encoded size in bytes.
     const SIZE: usize;
 }
 
-impl Size for u8 {
-    const SIZE: usize = 1;
+macro_rules! impl_size_primitive {
+    ($t:ty) => {
+        impl Size for $t {
+            const SIZE: usize = size_of::<$t>();
+        }
+    };
 }
 
-impl Size for u16 {
-    const SIZE: usize = 2;
+impl_size_primitive!(u8);
+impl_size_primitive!(u16);
+impl_size_primitive!(u32);
+impl_size_primitive!(u64);
+
+impl_size_primitive!(i8);
+impl_size_primitive!(i16);
+impl_size_primitive!(i32);
+impl_size_primitive!(i64);
+
+impl_size_primitive!(f32);
+impl_size_primitive!(f64);
+
+impl_size_primitive!(bool);
+
+impl_size_primitive!(char);
+
+impl_size_primitive!(());
+
+macro_rules! sum {
+    ($e:expr, $($es:expr),+) => {
+        $e + sum!($($es),+)
+    };
+    ($e:expr) => {
+        $e
+    }
 }
 
-impl Size for u32 {
-    const SIZE: usize = 4;
+macro_rules! impl_size_tuple {
+    ($($idx:tt),+) => {
+        paste! {
+            impl<$([<T$idx>],)*> Size for ($([<T$idx>],)+)
+            where
+                $([<T$idx>]: Size,)+
+            {
+                const SIZE: usize = sum!($( [<T$idx>]::SIZE ),*);
+            }
+        }
+    };
 }
 
-impl Size for u64 {
-    const SIZE: usize = 8;
-}
-
-impl Size for i8 {
-    const SIZE: usize = 1;
-}
-
-impl Size for i16 {
-    const SIZE: usize = 2;
-}
-
-impl Size for i32 {
-    const SIZE: usize = 4;
-}
-
-impl Size for i64 {
-    const SIZE: usize = 8;
-}
-
-impl Size for f32 {
-    const SIZE: usize = 4;
-}
-
-impl Size for f64 {
-    const SIZE: usize = 8;
-}
-
-impl Size for bool {
-    const SIZE: usize = 1;
-}
-
-impl Size for char {
-    const SIZE: usize = 4;
-}
-
-impl Size for () {
-    const SIZE: usize = 0;
-}
-
-// TODO: Abstract over the tuple size with a macro
-
-impl<T1> Size for (T1,) where T1: Size {
-    const SIZE: usize = T1::SIZE;
-}
-
-impl<T1, T2> Size for (T1, T2) where T1: Size, T2: Size {
-    const SIZE: usize = T1::SIZE + T2::SIZE;
-}
-
-impl<T1, T2, T3> Size for (T1, T2, T3) where T1: Size, T2: Size, T3: Size {
-    const SIZE: usize = T1::SIZE + T2::SIZE + T3::SIZE;
-}
-
-impl<T1, T2, T3, T4> Size for (T1, T2, T3, T4) where T1: Size, T2: Size, T3: Size, T4: Size {
-    const SIZE: usize = T1::SIZE + T2::SIZE + T3::SIZE + T4::SIZE;
-}
+impl_size_tuple!(0);
+impl_size_tuple!(0, 1);
+impl_size_tuple!(0, 1, 2);
+impl_size_tuple!(0, 1, 2, 3);
 
 impl<T> Size for &T where T: Size {
     const SIZE: usize = T::SIZE;
