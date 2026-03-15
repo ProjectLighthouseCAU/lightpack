@@ -14,6 +14,7 @@ license = "MIT"
 [dependencies]
 lightpack-derive = { version = "0.2.9", path = "lightpack-derive" }
 byteorder = { workspace = true }
+pastey = "0.2"
 
 [workspace]
 members = [

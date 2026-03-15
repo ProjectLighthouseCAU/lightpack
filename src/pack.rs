@@ -1,6 +1,7 @@
 //! The [`Pack`] trait and primitive implementations.
 
 use byteorder::ByteOrder;
+use pastey::paste;
 
 use crate::Size;
 
@@ -10,31 +11,24 @@ pub trait Pack: Size {
     fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder;
 }
 
-// TODO: Abstract over this with a macro
+macro_rules! impl_pack_number {
+    ($t:ty) => {
+        impl Pack for $t {
+            fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
+                paste!{ B::[<write_$t>](buffer, *self) }
+            }
+        }
+    };
+}
 
 impl Pack for u8 {
     fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
         buffer[0] = *self;
     }
 }
-
-impl Pack for u16 {
-    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
-        B::write_u16(buffer, *self);
-    }
-}
-
-impl Pack for u32 {
-    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
-        B::write_u32(buffer, *self);
-    }
-}
-
-impl Pack for u64 {
-    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
-        B::write_u64(buffer, *self);
-    }
-}
+impl_pack_number!(u16);
+impl_pack_number!(u32);
+impl_pack_number!(u64);
 
 impl Pack for i8 {
     fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
@@ -42,35 +36,12 @@ impl Pack for i8 {
     }
 }
 
-impl Pack for i16 {
-    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
-        B::write_i16(buffer, *self);
-    }
-}
+impl_pack_number!(i16);
+impl_pack_number!(i32);
+impl_pack_number!(i64);
 
-impl Pack for i32 {
-    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
-        B::write_i32(buffer, *self);
-    }
-}
-
-impl Pack for i64 {
-    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
-        B::write_i64(buffer, *self);
-    }
-}
-
-impl Pack for f32 {
-    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
-        B::write_f32(buffer, *self)
-    }
-}
-
-impl Pack for f64 {
-    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
-        B::write_f64(buffer, *self)
-    }
-}
+impl_pack_number!(f32);
+impl_pack_number!(f64);
 
 impl Pack for bool {
     fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
@@ -84,49 +55,30 @@ impl Pack for char {
     }
 }
 
-// TODO: Abstract over the tuple size with a macro
-
-impl Pack for () {
-    fn pack<B>(&self, _buffer: &mut [u8]) where B: ByteOrder {
-        // Do nothing
-    }
+macro_rules! impl_pack_tuple {
+    ($($idx:tt),*) => {
+        paste! {
+            impl<$([<T$idx>],)*> Pack for ($([<T$idx>],)*)
+            where
+                $([<T$idx>]: Pack,)*
+            {
+                #[allow(unused)] // because we generate one more "let buffer = ..." statement than we need
+                fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
+                    $(
+                        self.$idx.pack::<B>(buffer);
+                        let buffer = &mut buffer[[<T$idx>]::SIZE..];
+                    )*
+                }
+            }
+        }
+    };
 }
 
-impl<T0> Pack for (T0,) where T0: Pack {
-    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
-        self.0.pack::<B>(buffer);
-    }
-}
-
-impl<T0, T1> Pack for (T0, T1) where T0: Pack, T1: Pack {
-    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
-        self.0.pack::<B>(buffer);
-        let buffer = &mut buffer[T0::SIZE..];
-        self.1.pack::<B>(buffer);
-    }
-}
-
-impl<T0, T1, T2> Pack for (T0, T1, T2) where T0: Pack, T1: Pack, T2: Pack {
-    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
-        self.0.pack::<B>(buffer);
-        let buffer = &mut buffer[T0::SIZE..];
-        self.1.pack::<B>(buffer);
-        let buffer = &mut buffer[T1::SIZE..];
-        self.2.pack::<B>(buffer);
-    }
-}
-
-impl<T0, T1, T2, T3> Pack for (T0, T1, T2, T3) where T0: Pack, T1: Pack, T2: Pack, T3: Pack {
-    fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
-        self.0.pack::<B>(buffer);
-        let buffer = &mut buffer[T0::SIZE..];
-        self.1.pack::<B>(buffer);
-        let buffer = &mut buffer[T1::SIZE..];
-        self.2.pack::<B>(buffer);
-        let buffer = &mut buffer[T2::SIZE..];
-        self.3.pack::<B>(buffer);
-    }
-}
+impl_pack_tuple!();
+impl_pack_tuple!(0);
+impl_pack_tuple!(0, 1);
+impl_pack_tuple!(0, 1, 2);
+impl_pack_tuple!(0, 1, 2, 3);
 
 impl<T> Pack for &T where T: Pack {
     fn pack<B>(&self, buffer: &mut [u8]) where B: ByteOrder {
